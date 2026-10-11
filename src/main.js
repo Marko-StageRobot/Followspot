@@ -712,16 +712,16 @@ function setupIPC() {
     }
   });
   ipcMain.on('db-get-shows', (event) => {
-     ipcMain.on('db-get-show', (event, showId) => {
-    try {
-      const show = getDb().prepare('SELECT * FROM shows WHERE id = ?').get(showId);
-      event.returnValue = show || null;
-    } catch(e) { event.returnValue = null; }
-  });
     try {
       const shows = getDb().prepare('SELECT * FROM shows ORDER BY created_at DESC').all();
       event.returnValue = shows;
     } catch(e) { event.returnValue = []; }
+  });
+  ipcMain.on('db-get-show', (event, showId) => {
+    try {
+      const show = getDb().prepare('SELECT * FROM shows WHERE id = ?').get(showId);
+      event.returnValue = show || null;
+    } catch(e) { event.returnValue = null; }
   });
   ipcMain.on('db-get-spots', (event, showId) => {
     try {

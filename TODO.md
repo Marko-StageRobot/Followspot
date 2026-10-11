@@ -2,6 +2,15 @@
 
 Current version: Beta 0.3.0
 
+## Next (0.4.0): while beta feedback comes in
+- [ ] Promo video (see Marketing)
+- [ ] SpotPlot website (see Marketing)
+- [ ] Faster cue list loading: big shows take a couple of seconds to open
+- [ ] Undo for Renumber T·
+- [ ] First-run tips for Show Settings (spots, gels, iris sizes, Cue Settings)
+- [ ] Help → Send Feedback: opens an email to support with the app version filled in
+- [ ] Beta feedback: add items here as testers report them
+
 ## 0.3.0: release to the larger beta group
 
 **In so far (since 0.2.1):**
@@ -86,6 +95,8 @@ Current version: Beta 0.3.0
 
 ## Marketing
 - [ ] 30-second Apple-style promo video, "show from start to PDF finish": built in code with Remotion in a separate project folder next to followspot. Script the real app (remote-debugging port) to perform each step on an invented demo show (e.g. "The Lighthouse — A New Musical": cast with photos, 3 spots with gels, scenes, a full cue list), capture it in high resolution, then animate: desktop/Dock open → camera pushes into the window → build the show → zoom into a cue cell → character sheet → live print preview → PDF slides out → end card (logo, tagline, website). Short captions over scenes. Needs from Wheeler: tagline, website, royalty-free music track, format (16:9 and/or 9:16).
+
+- [ ] SpotPlot website: what it is, screenshots and the promo video, pricing, download, support/contact. Separate project folder next to followspot
 
 ## Future / roadmap
 - [ ] SpotPlot Live Sync: cloud upload from desktop + iPad companion app for operators
