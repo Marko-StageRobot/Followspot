@@ -157,7 +157,7 @@ export default function HomeScreen({ navigate }) {
                 <div style={{ fontSize: '11px', fontWeight: '600', color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '12px' }}>Links</div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   {[
-                    ['🌐 Visit spotplot.app', 'https://spotplot.app'],
+                    ['🌐 Visit spotplotapp.com', 'https://spotplotapp.com'],
                     ['📧 Contact support', 'mailto:wheeler@wheelermoon.com'],
                   ].map(([label, url]) => (
                     <button key={label} onClick={() => { const { shell } = window.require('electron'); shell.openExternal(url); }}

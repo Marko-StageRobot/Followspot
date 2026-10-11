@@ -1358,7 +1358,7 @@ app.whenReady().then(async () => {
       submenu: [
         { label: 'Show Tips Again', click: () => { mainWindow.webContents.send('menu-show-tips'); } },
         { type: 'separator' },
-        { label: 'SpotPlot Website', click: () => { shell.openExternal('https://wheelermoon.com'); } },
+        { label: 'SpotPlot Website', click: () => { shell.openExternal('https://spotplotapp.com'); } },
         { label: 'Contact Support', click: () => { shell.openExternal('mailto:wheeler@wheelermoon.com'); } },
       ],
     },
