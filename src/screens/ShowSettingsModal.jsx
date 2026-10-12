@@ -61,7 +61,7 @@ export default function ShowSettingsModal({ show, onClose, onShowUpdate, initial
             {activeSection === 'iris-sizes' && <IrisSizesPanel show={show} />}
             {activeSection === 'custom-actions' && <CustomActionsPanel show={show} />}
             {activeSection === 'eos-control' && <EosControlPanel />}
-            {activeSection === 'ipad-sync' && <IpadSyncPanel />}
+            {activeSection === 'ipad-sync' && <IpadSyncPanel show={show} />}
           </div>
         </div>
       </div>

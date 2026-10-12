@@ -633,6 +633,11 @@ function buildSheet(kind, opts) {
 }
 
 function setupIPC() {
+  // iPad Sync tab (Show Settings): the local-network connection for SpotPlot for iPad
+  ipcMain.on('ipad-sync-state', (event) => { event.returnValue = ipadSync.syncState(); });
+  ipcMain.handle('ipad-sync-set-enabled', (event, enabled) => ipadSync.setEnabled(enabled));
+  ipcMain.on('ipad-sync-new-code', (event) => { event.returnValue = ipadSync.regenerateCode(); });
+  ipcMain.on('ipad-sync-forget', (event, id) => { event.returnValue = ipadSync.forgetDevice(id); });
   // Live print preview: the real PDF, so page breaks show exactly as they'll print.
   // Async (invoke) so the screen stays responsive while it renders.
   ipcMain.handle('print-preview', async (event, { kind, ...opts }) => {
@@ -1287,6 +1292,7 @@ mainWindow.webContents.session.webRequest.onHeadersReceived((details, callback) 
 app.whenReady().then(async () => {
   getDb();
   setupIPC();
+  ipadSync.initIpadSync({ app, getDb, exportShow, buildSheet, renderPDFBuffer });
     getDb();
 
   const { Menu, shell } = require('electron');

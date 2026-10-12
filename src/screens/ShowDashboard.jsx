@@ -37,6 +37,18 @@ export default function ShowDashboard({ show: initialShow, navigate }) {
   useEffect(() => {
     reloadStats();
   }, [show.id]);
+
+  // iPad Sync dot: green while any iPad is connected to this show
+  const [ipadsOnline, setIpadsOnline] = useState(0);
+  useEffect(() => {
+    const check = () => {
+      const st = ipcRenderer.sendSync('ipad-sync-state');
+      setIpadsOnline(st.devices.filter(d => d.online && d.showId === show.id).length);
+    };
+    check();
+    const timer = setInterval(check, 3000);
+    return () => clearInterval(timer);
+  }, [show.id]);
 const startEdit = () => {
     setEditForm({
       title: show.title || '',
@@ -204,12 +216,12 @@ const startEdit = () => {
                   <div style={{ fontSize: '26px', fontWeight: '700', color: '#FFFFFF', lineHeight: 1.15 }}>{show.title}</div>
                   <div style={{ fontSize: '14px', color: 'rgba(255,255,255,0.55)', marginTop: '3px' }}>{show.theatre}{show.producer ? ` · ${show.producer}` : ''}</div>
                 </div>
-                {/* iPad Sync: the dot will turn green while operators' iPads are syncing */}
-                <button onClick={() => setShowSettings('ipad-sync')} title="iPad sync (coming soon)"
+                {/* iPad Sync: the dot is green while operators' iPads are connected to this show */}
+                <button onClick={() => setShowSettings('ipad-sync')} title={ipadsOnline ? `${ipadsOnline} iPad${ipadsOnline === 1 ? '' : 's'} connected` : 'iPad Sync'}
                   onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.14)'; }}
                   onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.10)'; }}
                   style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', height: '28px', padding: '0 12px', background: 'rgba(255,255,255,0.10)', border: 'none', borderRadius: '6px', color: '#FFFFFF', fontSize: '13px', fontWeight: '500', cursor: 'pointer', flexShrink: 0 }}>
-                  <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: 'rgba(255,255,255,0.35)' }} />
+                  <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: ipadsOnline ? '#30D158' : 'rgba(255,255,255,0.35)' }} />
                   iPad Sync
                 </button>
                 <button data-tour="show-settings" onClick={() => setShowSettings('show-info')}
