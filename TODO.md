@@ -3,8 +3,8 @@
 Current version: Beta 0.3.0
 
 ## Next (0.4.0): while beta feedback comes in
-- [ ] Promo video (see Marketing)
-- [ ] SpotPlot website (see Marketing)
+- [ ] Promo video: first cut done (silent, 27.6s) in `~/Desktop/spotplot-video`; parked. Next: add music and retime, then re-render (see its README)
+- [ ] SpotPlot website: first draft live at https://spotplotapp.com (repo `wheeler-moon/spotplot-website`). Next: tick Enforce HTTPS once GitHub's certificate is ready; Buy buttons when Stripe is set up; more polish later
 - [ ] Faster cue list loading: big shows take a couple of seconds to open
 - [ ] Undo for Renumber T·
 - [ ] First-run tips for Show Settings (spots, gels, iris sizes, Cue Settings)
