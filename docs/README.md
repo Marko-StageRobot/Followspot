@@ -19,6 +19,7 @@ SpotPlot is several projects that have to stay in step. This folder (in the desk
 | `../DESIGN.md` | The one design language: desktop app, iPad app, website and printed sheets. |
 | `sync-protocol.md` | The contract between the desktop app and the iPad app. Versioned. |
 | `ipad-app-plan.md` | The iPad app's design and build phases. |
+| `admin-dashboard-plan.md` | License server: expiry dates, Stripe, the admin dashboard, security fixes. |
 | `../CLAUDE.md` | How the desktop app is built, plus the "done means done" checklist. |
 
 ## How the projects connect

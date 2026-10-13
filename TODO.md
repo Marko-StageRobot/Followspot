@@ -54,8 +54,16 @@ Plan: `docs/ipad-app-plan.md`. Contract with the desktop: `docs/sync-protocol.md
 - [ ] Polish pass (more later)
 
 ## License server (`spotplot-server`)
-- [ ] Stripe: create license keys automatically on purchase (Standard and Student, monthly and yearly)
+
+Plan: `docs/admin-dashboard-plan.md`.
+
+- [ ] **Security, before paying customers:** remove the built-in admin password fallback; generate license keys with secure randomness; move storage from one JSON file to SQLite
+- [ ] Expiry dates on licenses (renews/expires on, grace period), returned to the app by `/validate`
+- [ ] Stripe: create and renew licenses automatically from webhooks (Standard and Student, monthly and yearly)
 - [ ] Student plan: .edu email verification
+- [ ] Admin dashboard: home (expiring soon, payments failing, by plan, revenue), search and filters, license page (extend/set expiry, change plan or device limit, revoke/reinstate, resend email, notes), history of every change, CSV export
+- [ ] Desktop app: show "Renews on…" and expiry notices from the license check (desktop section too)
+- [ ] Q1 2027: Production licenses (show, spots, close date). Q2 2027: Education licenses (school, seats)
 
 ## Business and pricing
 - [ ] Stripe integration. Plans: Standard $15/month or $144/year; Student $8/month or $72/year (.edu). Launch with Standard and Student in January; Production tier Q1 after launch; Education tier Q2
