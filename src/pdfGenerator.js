@@ -139,10 +139,10 @@ const sceneOrderMap = {};
     });
   }
 
+  // Gel numbers only in the header (names live on the Color Load sheet)
   const gelFramesHTML = colorSlots.filter(s => !s.is_permanent).map(slot => `
     <div class="gel-slot">
       <span class="gel-num">${slot.gel_number || '—'}</span>
-      <span class="gel-name">${slot.gel_name || 'Empty'}</span>
       <span class="gel-label">F${slot.slot_number}</span>
     </div>
   `).join('');
@@ -151,7 +151,6 @@ const sceneOrderMap = {};
   const permHTML = permSlot && permSlot.gel_number ? `
     <div class="gel-slot perm">
       <span class="gel-num">${permSlot.gel_number}</span>
-      <span class="gel-name">${permSlot.gel_name || ''}</span>
       <span class="gel-label">PERM</span>
     </div>
   ` : '';
@@ -558,7 +557,7 @@ const sceneOrderMap = {};
           <div class="spot-meta">${[spot.location, spot.fixture_type].filter(Boolean).join(' · ')}</div>
         </div>
       </div>
-      <div class="gel-frames" style="flex:1;flex-wrap:nowrap;overflow:hidden;">
+      <div class="gel-frames" style="flex:1;flex-wrap:nowrap;overflow:hidden;padding:1px 2px 1px 1px;"><!-- padding keeps the last frame's border from being clipped -->
         ${gelFramesHTML}
         ${permHTML}
       </div>

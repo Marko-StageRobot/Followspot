@@ -13,6 +13,7 @@ Cue list
 Printing
 - Caller sheet: each spot's color load sits centered over its own column, and the permanent color shows as a PERM frame
 - Color load: a frame with more than one gel is split into stacked bands, one per gel, in each gel's color
+- Spot sheets: the gel load at the top shows gel numbers only (names stay on the Color Load), and the PERM box's border is no longer cut off
 
 Spots & shows
 - A color frame can hold more than one gel (e.g. R02+R132): "+ Add gel" in New Show and Show Settings → Spot Settings
