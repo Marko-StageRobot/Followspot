@@ -7,6 +7,8 @@ The one to-do list for every SpotPlot project (see `docs/README.md` for the fami
 - New requests and beta bug reports go into the right product's section straight away, even if they're for "someday".
 - Anything that touches more than one product (e.g. new show data the iPad must understand) says so, so neither side is forgotten.
 
+**Launch target: January 1, 2027** (Standard and Student plans on sale). Everything here is sorted with that date in mind.
+
 Current desktop version: **0.3.0** (released 2026-10-10). Changes since then: `CHANGELOG.md` → Unreleased.
 
 ## Desktop app (`followspot`)
@@ -27,7 +29,7 @@ Current desktop version: **0.3.0** (released 2026-10-10). Changes since then: `C
 - [ ] Windows version
 
 ### Housekeeping
-- [ ] Commit the dev-only `SPOTPLOT_USER_DATA` switch in `src/main.js` (runs the app on a separate data folder; used for the promo video's demo show and iPad testing). Uncommitted since the video work
+- [ ] Commit the dev-only `SPOTPLOT_USER_DATA` switch in `src/main.js` (runs the app on a separate data folder, e.g. the demo show for iPad testing). Uncommitted so far
 
 ## iPad app (`spotplot-ipad`, not created yet)
 
@@ -58,7 +60,7 @@ Plan: `docs/ipad-app-plan.md`. Contract with the desktop: `docs/sync-protocol.md
 - [ ] Windows distribution
 
 ## Marketing
-- [ ] Promo video (`~/Desktop/spotplot-video`): first cut done (silent, 27.6s, 16:9). Next: Wheeler's music track, retime cuts to the beat, render (see its README)
+- [ ] Promo video (`~/Desktop/spotplot-video`): **parked until about mid-November**, while the product gets finished. A rough first cut exists (silent, 16:9); expect to rework it once the app and iPad app are closer to launch (see its README)
 
 ## Future
 - [ ] SpotPlot Live Sync over the cloud (beyond the local-network iPad app)
