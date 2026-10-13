@@ -274,6 +274,11 @@ function IrisStrip({ sizes, selected, onPick }) {
 
   return (
     <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: '2px' }}>
+      {/* Arrows on either side show there are more sizes that way; click to scroll */}
+      {more.left && (
+        <div onClick={() => { ref.current.scrollLeft -= 80; }} title="Earlier iris sizes"
+          style={{ flexShrink: 0, fontSize: '13px', fontWeight: '700', color: '#409CFF', cursor: 'pointer', padding: '0 2px', lineHeight: 1 }}>‹</div>
+      )}
       {/* Absolutely positioned so the chips never widen the table column; they scroll inside it instead */}
       <div style={{ flex: 1, minWidth: 0, position: 'relative', height: '20px' }}>
       <div ref={ref} className="no-scrollbar" onScroll={measure}

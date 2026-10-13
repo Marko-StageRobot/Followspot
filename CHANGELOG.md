@@ -8,6 +8,7 @@ Sections: Cue list · Printing · Spots & shows · iPad · Fixes · Other. Websi
 
 Cue list
 - Custom fade times (like 2.5s) now show in the cue list, not just on prints
+- The iris size buttons show a ‹ arrow on the left once you've scrolled, as well as the › arrow on the right, so you can tell there are more sizes either way
 
 Printing
 - Caller sheet: each spot's color load sits centered over its own column, and the permanent color shows as a PERM frame
