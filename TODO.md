@@ -20,6 +20,8 @@ Current desktop version: **0.3.0** (released 2026-10-10). Changes since then: `C
 - [ ] Help → Send Feedback: opens an email to support with the app version filled in
 - [ ] Beta feedback: add items here as testers report them
 
+- [ ] Print header redesign (Wheeler has opinions): caller sheet header, spot sheet header, and the Color Load page. Waiting on his notes
+
 ### Later
 - [ ] Action symbols cheat sheet PDF
 - [ ] Settings popup: more robust app-wide toggles
