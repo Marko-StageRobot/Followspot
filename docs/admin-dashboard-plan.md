@@ -50,7 +50,7 @@ Stripe is the source of truth for money; the license server is the source of tru
 
 - `/validate` returns expires_at, status and grace info.
 - SpotPlot shows "Renews on …" in Settings, and a gentle notice 7 days before an expiry that won't renew.
-- After a failed payment: full access through the grace period, with a notice; then the existing expired screen.
+- After a failed payment: the license is expired until paid (grace period setting, default 0), with a clear "update your card" link; then the existing expired screen.
 - Offline: keep trusting the cached license as today, but no further than its expiry plus grace.
 
 ## Timing (launch January 1, 2027)
@@ -59,8 +59,17 @@ Stripe is the source of truth for money; the license server is the source of tru
 - **Q1 2027:** Production licenses.
 - **Q2 2027:** Education licenses.
 
-## Open questions (Wheeler)
+## Decisions (Wheeler, 2026-10-13)
 
-1. Grace period after a failed payment (suggest 7–14 days)?
-2. Reminder emails before renewal or expiry, or only Stripe's receipts?
-3. Beta testers on January 1: start paying, or comped for a while?
+- **Beta testers don't pay.** Their licenses are `beta`/`comped`; Wheeler sets each end date by hand in the dashboard.
+- **Failed payment = expired until paid.** No grace period by default; the license works again as soon as payment succeeds. (Trade-off noted: Stripe retries cards for several days and most failures are expired cards, so an operator could be locked out mid-tech. Keep the grace period as a setting, default 0, in case this changes.)
+- **Emails:** Stripe sends receipts, failed-payment emails (with a link to update the card), expiring-card notices and renewal reminders, plus the customer portal for updating cards and canceling. SpotPlot only sends its own emails for things Stripe doesn't know about (e.g. a comped beta license nearing its end date).
+
+## Before launch: legal and tax (check with a lawyer / accountant)
+
+Not legal advice; research the current rules when setting up Stripe and have them checked.
+
+- US automatic-renewal laws (state laws such as California's, plus federal ROSCA): show price, renewal frequency and how to cancel clearly at checkout with active agreement; send a confirmation email with those terms; make online cancellation easy (Stripe customer portal); for yearly plans, send a renewal reminder ahead of time (several states require roughly 15–45 days).
+- Sales tax on software subscriptions in some states (Stripe Tax can calculate and collect).
+- Customers outside the US: EU/UK consumer rules (e.g. withdrawal rights for digital purchases) and VAT.
+- Terms of service and privacy policy pages on the website, matching the above.
