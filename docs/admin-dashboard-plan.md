@@ -49,7 +49,8 @@ Stripe is the source of truth for money; the license server is the source of tru
 ## In the desktop app
 
 - `/validate` returns expires_at, status and grace info.
-- SpotPlot shows "Renews on …" in Settings, and a gentle notice 7 days before an expiry that won't renew.
+- **Home → Settings → Account** holds the user's license info (Wheeler, 2026-10-13): email, key, plan, status, **Renews on / Expires on** (beta and comped show their end date), **Macs in use** (e.g. 1 of 2), and **Manage subscription** (opens Stripe's customer portal to update a card or cancel).
+- A gentle notice 7 days before an expiry that won't renew.
 - After a failed payment: 24 hours of full access with a clear "update your card" notice and link; after that, the existing expired screen until payment succeeds.
 - Offline: keep trusting the cached license as today, but no further than its expiry plus grace.
 

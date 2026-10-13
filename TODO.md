@@ -62,7 +62,7 @@ Plan: `docs/admin-dashboard-plan.md`.
 - [ ] Stripe: create and renew licenses automatically from webhooks (Standard and Student, monthly and yearly)
 - [ ] Student plan: .edu email verification
 - [ ] Admin dashboard: home (expiring soon, payments failing, by plan, revenue), search and filters, license page (extend/set expiry, change plan or device limit, revoke/reinstate, resend email, notes), history of every change, CSV export
-- [ ] Desktop app: show "Renews on…" and expiry notices from the license check (desktop section too)
+- [ ] Desktop app, Home → Settings → Account: Renews on / Expires on, Macs in use (1 of 2), Manage subscription (Stripe portal), and expiry / failed-payment notices
 - [ ] Stripe emails: turn on receipts, failed-payment and expiring-card emails, yearly renewal reminders, and the customer portal (cancel / update card)
 - [ ] Before launch: research current auto-renewal, sales-tax and international rules; checklist for a lawyer/accountant to sign off; add Terms of Service and Privacy pages to the website
 - [ ] Q1 2027: Production licenses (show, spots, close date). Q2 2027: Education licenses (school, seats)
