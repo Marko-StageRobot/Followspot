@@ -106,4 +106,5 @@ Current version: Beta 0.3.0
 - [ ] SpotPlot website: what it is, screenshots and the promo video, pricing, download, support/contact. Separate project folder next to followspot
 
 ## Future / roadmap
+- [ ] Import a SpotOn file (a CSV export) and automatically build a SpotPlot show from it: spots, cues and each spot's cue data. Needs a sample SpotOn CSV to map its columns
 - [ ] SpotPlot Live Sync: cloud upload from desktop + iPad companion app for operators
