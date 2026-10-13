@@ -4,6 +4,7 @@ import { TIPS } from '../tips';
 import AppHeader from '../components/AppHeader';
 import RichLine from '../components/RichLine';
 import { cueFieldSettings } from '../cueFields';
+import { irisSizeList } from '../irisSizes';
 const { ipcRenderer } = window.require('electron');
 const GEL_COLORS = {
   // ROSCO ROSCOLUX
@@ -160,7 +161,7 @@ const GEL_COLORS = {
 
 function getGelColor(gelNum) {
   if (!gelNum) return '#2a2a2a';
-  const key = gelNum.toUpperCase().replace(/\s/g, '');
+  const key = gelNum.split('+')[0].toUpperCase().replace(/\s/g, ''); // a frame with R02+R132 shows the first gel's color
   return GEL_COLORS[key] || '#2a2a2a';
 }
 
@@ -297,7 +298,7 @@ function IrisStrip({ sizes, selected, onPick }) {
   );
 }
 
-function SpotCueCell({ spotCue, spot, cue, fieldsShown = {}, characters, colorSlots, onUpdate, onNewCustomCharacter, lqNumber, onDragStart, onDragOver, onDragLeave, onDrop, isDragTarget, onDoubleClick, customIrisSizes, customActions }) {
+function SpotCueCell({ spotCue, spot, cue, fieldsShown = {}, characters, colorSlots, onUpdate, onNewCustomCharacter, lqNumber, onDragStart, onDragOver, onDragLeave, onDrop, isDragTarget, onDoubleClick, irisSizes, customActions }) {
   const [showActionPicker, setShowActionPicker] = useState(false);
   const [hoveredFrame, setHoveredFrame] = useState(null);
   const [showCustomTime, setShowCustomTime] = useState(false);
@@ -513,9 +514,11 @@ const actionDef = ACTIONS.find(a => a.name === spotCue?.action) || (customAction
                 style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid #0A84FF', borderRadius: '6px', color: '#FFFFFF', padding: '3px 4px', fontSize: '11px', outline: 'none' }}
                 placeholder="e.g. 2.5" />
             ) : (
-              <select value={spotCue.fade_time || ''} onChange={e => { if (e.target.value === 'Custom') { setShowCustomTime(true); setCustomTimeVal(''); } else onUpdate(spotCue.id, 'fade_time', e.target.value); }}
+              <select value={spotCue.fade_time || ''} onChange={e => { if (e.target.value === 'Custom') { setShowCustomTime(true); setCustomTimeVal(TIMES.includes(spotCue.fade_time) ? '' : (spotCue.fade_time || '')); } else onUpdate(spotCue.id, 'fade_time', e.target.value); }}
                 style={{ ...selectStyle, color: spotCue.fade_time ? '#FFFFFF' : 'rgba(255,255,255,0.28)' }}>
                 <option value="">Time...</option>
+                {/* A typed custom time isn't in the list, so add it as its own choice to show it */}
+                {spotCue.fade_time && !TIMES.includes(spotCue.fade_time) && <option value={spotCue.fade_time}>{spotCue.fade_time}s</option>}
                 {TIMES.map(t => <option key={t} value={t}>{t === 'Custom' ? 'Custom...' : t + 's'}</option>)}
               </select>
             )}
@@ -523,7 +526,7 @@ const actionDef = ACTIONS.find(a => a.name === spotCue?.action) || (customAction
         </div>
 
 <div data-tour="cue-look" style={{ display: 'flex', alignItems: 'center', marginBottom: '3px', gap: '8px' }}>
-          {fieldsShown.iris === false ? <div style={{ flex: 1 }} /> : <IrisStrip sizes={[{label:'FB',value:'Full Body'},{label:'3/4',value:'3/4 Body'},{label:'1/2',value:'1/2 Body'},{label:'H&S',value:'Head & Shoulders'},{label:'Hd',value:'Head'}, ...(customIrisSizes || [])]}
+          {fieldsShown.iris === false ? <div style={{ flex: 1 }} /> : <IrisStrip sizes={irisSizes || []}
             selected={spotCue.frame_size}
             onPick={value => onUpdate(spotCue.id, 'frame_size', spotCue.frame_size === value ? '' : value)} />}
           <div style={{ display: fieldsShown.color === false ? 'none' : 'flex', gap: '3px', alignItems: 'center', flexShrink: 0 }}>
@@ -634,7 +637,7 @@ function InsertButton({ onInsert }) {
   );
 }
 
-function CueRow({ cue, isLastCue, fieldsShown, spots, spotCues, characters, colorSlotsBySpot, scenes, onUpdateCue, onUpdateSpotCue, onNewCustomCharacter, onDelete, onInsertAfter, dragSource, dragTarget, setDragSource, setDragTarget, setShowDragModal, onCueDoubleClick, customIrisSizes, customActions }) {
+function CueRow({ cue, isLastCue, fieldsShown, spots, spotCues, characters, colorSlotsBySpot, scenes, onUpdateCue, onUpdateSpotCue, onNewCustomCharacter, onDelete, onInsertAfter, dragSource, dragTarget, setDragSource, setDragTarget, setShowDragModal, onCueDoubleClick, irisSizes, customActions }) {
   const [editingLQ, setEditingLQ] = useState(false);
   const [lqVal, setLqVal] = useState(cue.lq_number || '');
 
@@ -702,7 +705,7 @@ function CueRow({ cue, isLastCue, fieldsShown, spots, spotCues, characters, colo
                 }
               }}
               isDragTarget={dragTarget?.cue?.id === cue?.id && dragTarget?.spot?.id === spot?.id}
-              customIrisSizes={customIrisSizes}
+              irisSizes={irisSizes}
               customActions={customActions}
               onDoubleClick={() => onCueDoubleClick(cue, spot, sc)}
             />
@@ -752,7 +755,7 @@ export default function CueListScreen({ show, navigate }) {
     });
     setContinuedScene(current);
   };
-  const [customIrisSizes, setCustomIrisSizes] = useState([]);
+  const [irisSizes, setIrisSizes] = useState([]);
   // Which cue fields this show shows on the cue list (Show Settings > Cue Settings)
   const [listFields, setListFields] = useState({});
   const [customActions, setCustomActions] = useState([]);
@@ -781,8 +784,8 @@ export default function CueListScreen({ show, navigate }) {
     }
     setColorSlotsBySpot(slotsBySpot);
     const updatedShow = ipcRenderer.sendSync('db-get-show', show.id);
-    const customSizes = updatedShow?.iris_sizes ? JSON.parse(updatedShow.iris_sizes) : [];
-    setCustomIrisSizes(customSizes);
+    // The show's iris sizes in order (defaults, possibly renamed or moved, plus custom ones)
+    setIrisSizes(irisSizeList(updatedShow?.iris_sizes));
     const customActionData = updatedShow?.custom_actions ? JSON.parse(updatedShow.custom_actions) : [];
     setCustomActions(customActionData);
     setListFields(Object.fromEntries(Object.entries(cueFieldSettings(updatedShow?.cue_fields)).map(([k, v]) => [k, v.list])));
@@ -1070,7 +1073,7 @@ const groupedCues = () => {
                       dragSource={dragSource} dragTarget={dragTarget}
                       setDragSource={setDragSource} setDragTarget={setDragTarget}
                       setShowDragModal={setShowDragModal}
-                      customIrisSizes={customIrisSizes}
+                      irisSizes={irisSizes}
                       customActions={customActions}
                       onCueDoubleClick={(cue, spot, spotCue) => {
                       setCuePopup({ cue, spot, spotCue });

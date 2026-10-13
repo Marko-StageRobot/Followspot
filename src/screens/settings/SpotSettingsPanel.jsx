@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import SwapSpotsDialog from '../../components/SwapSpotsDialog';
 import CopyColorsSelect from '../../components/CopyColorsSelect';
+import { GelFramePicker } from '../../components/GelPicker';
 const { ipcRenderer } = window.require('electron');
 
 import { FIXTURES } from '../../fixtures';
@@ -11,62 +12,14 @@ const inputStyle = {
   fontSize: '13px', outline: 'none', boxSizing: 'border-box',
 };
 
-function GelPicker({ value, onChange, placeholder }) {
-  const [query, setQuery] = useState(value || '');
-  const [results, setResults] = useState([]);
-  const [open, setOpen] = useState(false);
-  const ref = React.useRef();
-
-  React.useEffect(() => {
-    if (query.length < 1) { setResults([]); return; }
-    const r = ipcRenderer.sendSync('db-search-gels', query);
-    setResults(r || []);
-    setOpen((r || []).length > 0);
-  }, [query]);
-
-  React.useEffect(() => {
-    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, []);
-
-  const select = (gel) => {
-    setQuery(gel.gel_number + ' ' + gel.gel_name);
-    onChange({ gel_number: gel.gel_number, gel_name: gel.gel_name });
-    setOpen(false);
-  };
-
-  return (
-    <div ref={ref} style={{ position: 'relative' }}>
-      <input style={{ ...inputStyle, fontSize: '11px', padding: '5px 8px' }}
-        value={query}
-        placeholder={placeholder || 'Search gel...'}
-        onChange={e => { setQuery(e.target.value); onChange({ gel_number: '', gel_name: e.target.value }); }}
-        onFocus={() => query.length > 0 && results.length > 0 && setOpen(true)} />
-      {open && (
-        <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 1000, background: '#2A2A2A', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '6px', maxHeight: '180px', overflowY: 'auto', marginTop: '2px' }}>
-          {results.map((gel, i) => (
-            <div key={i} onMouseDown={() => select(gel)}
-              style={{ padding: '6px 10px', cursor: 'pointer', fontSize: '12px', borderBottom: '1px solid rgba(255,255,255,0.1)', display: 'flex', gap: '8px' }}
-              onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
-              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-              <span style={{ color: '#409CFF', fontWeight: '600', minWidth: '50px' }}>{gel.gel_number}</span>
-              <span style={{ color: 'rgba(255,255,255,0.78)' }}>{gel.gel_name}</span>
-              <span style={{ color: 'rgba(255,255,255,0.45)', marginLeft: 'auto' }}>{gel.manufacturer}</span>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
 function SpotCard({ spot, colorSlots, onUpdateSpot, onUpdateGel, onDelete, otherSpots, onCopyColorsFrom, onSetPermanent }) {
   const [permJustOn, setPermJustOn] = useState(false);
   // Bumped after a copy so the gel pickers re-read their values
   const [copyCount, setCopyCount] = useState(0);
   const isCustomFixture = spot.fixture_type && !FIXTURES.includes(spot.fixture_type);
   const [showCustomFixture, setShowCustomFixture] = useState(isCustomFixture);
+  // A typed fixture can arrive from Copy colors, so switch to the text box when needed
+  useEffect(() => { if (isCustomFixture) setShowCustomFixture(true); }, [spot.fixture_type]);
   const slots = colorSlots || [];
   const regularSlots = slots.filter(s => !s.is_permanent);
   const permSlot = slots.find(s => s.is_permanent);
@@ -106,7 +59,7 @@ function SpotCard({ spot, colorSlots, onUpdateSpot, onUpdateGel, onDelete, other
           <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.52)', marginBottom: '4px' }}>Fixture type</div>
           {showCustomFixture ? (
             <div>
-              <input style={inputStyle} defaultValue={spot.fixture_type || ''}
+              <input key={spot.fixture_type || ''} style={inputStyle} defaultValue={spot.fixture_type || ''}
                 onBlur={e => onUpdateSpot(spot.id, 'fixture_type', e.target.value)}
                 placeholder="Enter fixture type..." />
               <div onClick={() => { onUpdateSpot(spot.id, 'fixture_type', ''); setShowCustomFixture(false); }}
@@ -131,8 +84,7 @@ function SpotCard({ spot, colorSlots, onUpdateSpot, onUpdateGel, onDelete, other
         {regularSlots.map(slot => (
           <div key={slot.id} style={{ background: '#2A2A2A', borderRadius: '8px', padding: '8px' }}>
             <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.45)', marginBottom: '4px', fontWeight: '600' }}>Frame {slot.slot_number}</div>
-            <GelPicker
-              value={slot.gel_number ? slot.gel_number + ' ' + slot.gel_name : ''}
+            <GelFramePicker gelNumber={slot.gel_number} gelName={slot.gel_name}
               onChange={gel => onUpdateGel(spot.id, slot.id, gel)}
               placeholder="Search gel..." />
           </div>
@@ -148,8 +100,7 @@ function SpotCard({ spot, colorSlots, onUpdateSpot, onUpdateGel, onDelete, other
       {permSlot && (permJustOn || permSlot.gel_number || permSlot.gel_name) && (
         <div style={{ background: '#2A2A2A', borderRadius: '8px', padding: '8px', border: '1px solid rgba(255,214,10,0.25)' }}>
           <div style={{ fontSize: '10px', color: '#C8A26B', marginBottom: '6px', fontWeight: '600' }}>Permanent frame</div>
-          <GelPicker key={copyCount}
-            value={permSlot.gel_number ? permSlot.gel_number + ' ' + permSlot.gel_name : ''}
+          <GelFramePicker key={copyCount} gelNumber={permSlot.gel_number} gelName={permSlot.gel_name}
             onChange={gel => onUpdateGel(spot.id, permSlot.id, gel)}
             placeholder="Search gel..." />
         </div>
@@ -201,7 +152,9 @@ export default function SpotSettingsPanel({ show }) {
     const sourcePerm = source.find(sl => sl.is_permanent);
     const targetSpot = spots.find(s => s.id === targetId), sourceSpot = spots.find(s => s.id === sourceId);
     if (target.some(sl => sl.gel_number || sl.gel_name) &&
-        !window.confirm(`Replace Spot ${targetSpot?.spot_number}'s colors with Spot ${sourceSpot?.spot_number}'s?`)) return false;
+        !window.confirm(`Replace Spot ${targetSpot?.spot_number}'s colors and fixture with Spot ${sourceSpot?.spot_number}'s?`)) return false;
+    // Same gels usually means the same fixture, so the fixture type comes along
+    if (sourceSpot) updateSpot(targetId, 'fixture_type', sourceSpot.fixture_type || '');
     // The permanent color comes along too: give the target a permanent slot if it needs one
     if (sourcePerm && (sourcePerm.gel_number || sourcePerm.gel_name) && !target.some(sl => sl.is_permanent)) {
       target = setPermanent(targetId, true) || target;

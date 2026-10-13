@@ -252,7 +252,8 @@ const startEdit = () => {
 
           <div style={sectionLabel}>Spots</div>
           <div style={group}>
-            {stats.spots.map((spot, i) => (
+            {/* Always in spot-number order here, whatever order is set in Show Settings → Spot Order */}
+            {[...stats.spots].sort((a, b) => a.spot_number - b.spot_number).map((spot, i) => (
               <div key={spot.id} style={row(i)}>
                 <div style={{ width: '52px', fontSize: '13px', fontWeight: '600', color: '#409CFF', flexShrink: 0 }}>Spot {spot.spot_number}</div>
                 <div style={{ flex: 1, fontSize: '14px', color: spot.operator_name ? '#FFFFFF' : 'rgba(255,255,255,0.35)' }}>{spot.operator_name || 'No operator'}</div>

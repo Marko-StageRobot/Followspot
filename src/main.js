@@ -182,15 +182,17 @@ function initSchema() {
   }
 }
 
+// The gel catalog. Gels added to this list later are added to existing databases too
+// (anything missing is inserted on launch), so new gels reach everyone.
 function seedGels() {
   const count = db.prepare('SELECT COUNT(*) as c FROM gels').get();
-    if (count.c >= 500) return;
-  db.prepare('DELETE FROM gels').run();
+  if (count.c < 500) db.prepare('DELETE FROM gels').run(); // an old, incomplete catalog: start fresh
+  const exists = db.prepare('SELECT 1 FROM gels WHERE manufacturer = ? AND gel_number = ?');
   const insert = db.prepare('INSERT INTO gels (manufacturer, gel_number, gel_name) VALUES (?, ?, ?)');
-  const insertMany = db.transaction((gels) => {
-    for (const g of gels) insert.run(g[0], g[1], g[2]);
+  const insertMissing = db.transaction((gels) => {
+    for (const g of gels) if (!exists.get(g[0], g[1])) insert.run(g[0], g[1], g[2]);
   });
-  insertMany([
+  insertMissing([
     // ROSCO ROSCOLUX - Colors
     ['Rosco','R00','Clear'],
     ['Rosco','R01','Light Bastard Amber'],['Rosco','R02','Bastard Amber'],
@@ -244,6 +246,7 @@ function seedGels() {
     ['Rosco','R97','Light Grey'],['Rosco','R98','Medium Grey'],
     ['Rosco','R99','Chocolate'],
     // ROSCO 300-series
+    ['Rosco','R302','Pale Bastard Amber'],
     ['Rosco','R303','Warm Peach'],['Rosco','R304','Pale Apricot'],
     ['Rosco','R305','Rose Gold'],['Rosco','R310','Daffodil'],
     ['Rosco','R312','Canary'],['Rosco','R313','Light Relief Yellow'],
@@ -1176,6 +1179,14 @@ ipcMain.on('db-get-show-stats', (event, showId) => {
       console.error(e);
       event.returnValue = { success: false };
     }
+  });
+
+  // Renaming an iris size (Show Settings → Iris Sizes) renames it in every cue of the show too
+  ipcMain.on('db-rename-iris-size', (event, { showId, from, to }) => {
+    try {
+      const r = getDb().prepare('UPDATE spot_cues SET frame_size = ? WHERE frame_size = ? AND cue_id IN (SELECT id FROM cues WHERE show_id = ?)').run(to, from, showId);
+      event.returnValue = { success: true, changed: r.changes };
+    } catch(e) { event.returnValue = { success: false, error: e.message }; }
   });
 
   ipcMain.on('db-update-cue', (event, { cueId, field, value }) => {

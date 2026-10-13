@@ -10,6 +10,13 @@ Current version: Beta 0.3.0
 - [ ] First-run tips for Show Settings (spots, gels, iris sizes, Cue Settings)
 - [ ] Help → Send Feedback: opens an email to support with the app version filled in
 - [ ] Beta feedback: add items here as testers report them
+- [x] Gel catalog: add R302 (Pale Bastard Amber); new gels in the list now reach existing databases on launch
+- [x] Color frames: allow more than one gel in a frame (e.g. R02+R132)
+- [x] Copy colors from another spot also copies its fixture type
+- [x] Caller sheet: show the permanent color, and line each spot's color load up over its column
+- [x] Show Settings → Iris Sizes: rename and reorder the default sizes too
+- [x] Cue list: a custom fade time shows "Time…" instead of the typed value (prints fine)
+- [x] Show dashboard: list spots in number order, even after reordering them in Show Settings
 
 ## 0.3.0: release to the larger beta group
 

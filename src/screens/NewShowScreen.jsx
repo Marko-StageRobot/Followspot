@@ -3,6 +3,7 @@ import AppHeader from '../components/AppHeader';
 import Tips from '../components/Tips';
 import { TIPS } from '../tips';
 import CopyColorsSelect from '../components/CopyColorsSelect';
+import { GelFramePicker } from '../components/GelPicker';
 const { ipcRenderer } = window.require('electron');
 
 import { FIXTURES } from '../fixtures';
@@ -16,60 +17,6 @@ const imageSrc = (filePath) => {
 };
 const labelStyle = { fontSize: '11px', color: 'rgba(255,255,255,0.62)', display: 'block', marginBottom: '4px', fontWeight: '500' };
 const inputStyle = { width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '6px', color: '#FFFFFF', padding: '7px 10px', fontSize: '13px', outline: 'none', boxSizing: 'border-box' };
-
-function GelPicker({ value, onChange, placeholder }) {
-  const [query, setQuery] = useState(value || '');
-  const [results, setResults] = useState([]);
-  const [open, setOpen] = useState(false);
-  const ref = useRef();
-
-  useEffect(() => {
-    if (query.length < 1) { setResults([]); return; }
-    const r = ipcRenderer.sendSync('db-search-gels', query);
-    setResults(r || []);
-    setOpen((r || []).length > 0);
-  }, [query]);
-
-  useEffect(() => {
-    const handler = (e) => {
-      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
-    };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, []);
-
-  const select = (gel) => {
-    setQuery(gel.gel_number + ' ' + gel.gel_name);
-    onChange({ gel_number: gel.gel_number, gel_name: gel.gel_name });
-    setOpen(false);
-  };
-
-  return (
-    <div ref={ref} style={{ position: 'relative' }}>
-      <input
-        style={{ ...inputStyle, fontSize: '11px', padding: '5px 8px' }}
-        value={query}
-        placeholder={placeholder || 'Search gel...'}
-        onChange={e => { setQuery(e.target.value); onChange({ gel_number: '', gel_name: e.target.value }); }}
-        onFocus={() => query.length > 0 && results.length > 0 && setOpen(true)}
-      />
-      {open && (
-        <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 1000, background: '#2A2A2A', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '6px', maxHeight: '180px', overflowY: 'auto', marginTop: '2px' }}>
-          {results.map((gel, i) => (
-            <div key={i} onMouseDown={() => select(gel)}
-              style={{ padding: '6px 10px', cursor: 'pointer', fontSize: '12px', borderBottom: '1px solid rgba(255,255,255,0.1)', display: 'flex', gap: '8px' }}
-              onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
-              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-              <span style={{ color: '#409CFF', fontWeight: '600', minWidth: '50px' }}>{gel.gel_number}</span>
-              <span style={{ color: 'rgba(255,255,255,0.78)' }}>{gel.gel_name}</span>
-              <span style={{ color: 'rgba(255,255,255,0.45)', marginLeft: 'auto' }}>{gel.manufacturer}</span>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
 
 function newSpot(number) {
   return {
@@ -142,8 +89,7 @@ function SpotSetup({ spot, spotNumber, onChange, onRemove, otherSpots, onCopyCol
         {spot.gels.map((gel, i) => (
           <div key={i} style={{ background: 'rgba(255,255,255,0.05)', borderRadius: '8px', padding: '8px' }}>
             <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.45)', marginBottom: '4px', fontWeight: '600' }}>Frame {gel.slot}</div>
-            <GelPicker
-              value={gel.gel_number ? gel.gel_number + ' ' + gel.gel_name : ''}
+            <GelFramePicker gelNumber={gel.gel_number} gelName={gel.gel_name}
               onChange={gelData => updateGel(i, gelData)}
               placeholder="Search gel..." />
           </div>
@@ -158,8 +104,7 @@ function SpotSetup({ spot, spotNumber, onChange, onRemove, otherSpots, onCopyCol
       {(spot.perm_on || spot.perm_gel_number || spot.perm_gel_name) && (
       <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: '8px', padding: '8px', border: '1px solid rgba(255,214,10,0.25)' }}>
         <div style={{ fontSize: '10px', color: '#C8A26B', marginBottom: '6px', fontWeight: '600' }}>Permanent frame</div>
-        <GelPicker key={copyCount}
-          value={spot.perm_gel_number ? spot.perm_gel_number + ' ' + spot.perm_gel_name : ''}
+        <GelFramePicker key={copyCount} gelNumber={spot.perm_gel_number} gelName={spot.perm_gel_name}
           onChange={gelData => onChange({ ...spot, perm_gel_number: gelData.gel_number, perm_gel_name: gelData.gel_name })}
           placeholder="Search gel..." />
       </div>
@@ -184,8 +129,10 @@ export default function NewShowScreen({ navigate }) {
   const hasGels = sp => sp.gels.some(g => g.gel_number || g.gel_name) || sp.perm_gel_number || sp.perm_gel_name;
   const copyColors = (targetIdx, sourceIdx) => {
     const source = spots[sourceIdx];
-    if (hasGels(spots[targetIdx]) && !window.confirm(`Replace Spot ${targetIdx + 1}'s colors with Spot ${sourceIdx + 1}'s?`)) return false;
-    updateSpot(targetIdx, { ...spots[targetIdx], gels: source.gels.map(g => ({ ...g })), perm_on: source.perm_on, perm_gel_number: source.perm_gel_number, perm_gel_name: source.perm_gel_name });
+    if (hasGels(spots[targetIdx]) && !window.confirm(`Replace Spot ${targetIdx + 1}'s colors and fixture with Spot ${sourceIdx + 1}'s?`)) return false;
+    // The fixture type comes along with the gels
+    updateSpot(targetIdx, { ...spots[targetIdx], gels: source.gels.map(g => ({ ...g })), perm_on: source.perm_on, perm_gel_number: source.perm_gel_number, perm_gel_name: source.perm_gel_name,
+      fixture_type: source.fixture_type, fixture_other: source.fixture_other });
     return true;
   };
 

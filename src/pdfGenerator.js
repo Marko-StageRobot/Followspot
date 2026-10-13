@@ -619,12 +619,17 @@ function buildCallerSheetHTML({ cueFields, show, spots, colorSlotsBySpot, cues, 
 
   const spotsHeaderHTML = spots.map(spot => {
     const slots = (colorSlotsBySpot[spot.id] || []).filter(s => !s.is_permanent);
+    const perm = (colorSlotsBySpot[spot.id] || []).find(s => s.is_permanent && (s.gel_number || s.gel_name));
     const gelHTML = slots.map(slot => `
       <div class="gel-slot">
         <span class="gel-label">F${slot.slot_number}</span>
         <span class="gel-num">${slot.gel_number || '—'}</span>
       </div>
-    `).join('');
+    `).join('') + (perm ? `
+      <div class="gel-slot perm">
+        <span class="gel-label">PERM</span>
+        <span class="gel-num">${perm.gel_number || perm.gel_name}</span>
+      </div>` : '');
     return `
       <div class="spot-header-card">
         <div class="spot-header-top">
@@ -750,9 +755,6 @@ function buildCallerSheetHTML({ cueFields, show, spots, colorSlotsBySpot, cues, 
     display: flex;
     align-items: flex-start;
     gap: 12px;
-    margin-bottom: 8px;
-    padding-bottom: 8px;
-    border-bottom: 3px solid #1a1a1a;
   }
 
   .header-logo {
@@ -999,14 +1001,20 @@ function buildCallerSheetHTML({ cueFields, show, spots, colorSlotsBySpot, cues, 
     padding: 5px 10px;
   }
 
+  /* Each spot's color load sits centered over its own column (first column = LQ) */
   .spots-header-row {
-    display: flex;
-    gap: 8px;
+    display: grid;
+    grid-template-columns: 48px repeat(${spots.length}, 1fr);
+    column-gap: 0;
     margin-top: 6px;
+    padding-bottom: 8px;
+    margin-bottom: 8px;
+    border-bottom: 3px solid #1a1a1a;
   }
 
   .spot-header-card {
-    flex: 1;
+    justify-self: center;
+    max-width: calc(100% - 8px);
     background: #f5f5f5;
     border: 1.5px solid #ddd;
     border-radius: 6px;
@@ -1037,7 +1045,9 @@ function buildCallerSheetHTML({ cueFields, show, spots, colorSlotsBySpot, cues, 
     min-width: 32px;
   }
 
+  .gel-slot.perm { border-color: #E3C04A; background: #FFF8DC; }
   .gel-label { font-size: 6pt; color: #aaa; font-weight: 700; }
+  .gel-slot.perm .gel-label { color: #A8871E; }
   .gel-num { font-size: 8pt; font-weight: 800; color: #1a1a1a; }
   .gel-name { font-size: 6pt; color: #777; text-align: center; white-space: nowrap; overflow: hidden; max-width: 44px; text-overflow: ellipsis; }
   ${hiddenFieldCSS(cueFields, {
@@ -1060,14 +1070,15 @@ function buildCallerSheetHTML({ cueFields, show, spots, colorSlotsBySpot, cues, 
           show.assistant_ld ? `Asst: ${show.assistant_ld}` : '',
         ].filter(Boolean).join(' &nbsp;·&nbsp; ')}
       </div>
-      <div class="spots-header-row">
-        ${spotsHeaderHTML}
-      </div>
     </div>
     <div class="header-right">
       <div class="print-label">${label || 'Caller Sheet'}</div>
       <div class="print-date">${new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</div>
     </div>
+  </div>
+  <div class="spots-header-row">
+    <div></div>
+    ${spotsHeaderHTML}
   </div>
 
   <table>
@@ -1254,7 +1265,7 @@ function buildColorLoadHTML({ show, spots, colorSlotsBySpot, label }) {
 
   const getGelColor = (gelNum) => {
     if (!gelNum) return '#e0e0e0';
-    const key = gelNum.toUpperCase().replace(/\s/g, '');
+    const key = gelNum.split('+')[0].toUpperCase().replace(/\s/g, ''); // R02+R132 uses the first gel's color
     return GEL_COLORS[key] || '#d0d0d0';
   };
 
@@ -1270,33 +1281,33 @@ function buildColorLoadHTML({ show, spots, colorSlotsBySpot, label }) {
     const regularSlots = slots.filter(s => !s.is_permanent);
     const permSlot = slots.find(s => s.is_permanent);
 
-    const framesHTML = regularSlots.map(slot => {
-      const bgColor = getGelColor(slot.gel_number);
-      const textColor = isDark(bgColor) ? '#ffffff' : '#1a1a1a';
-      const subColor = isDark(bgColor) ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.5)';
-      return `
-        <div class="frame-card" style="background:${bgColor};">
-          <div class="frame-label" style="color:${subColor};">Frame ${slot.slot_number}</div>
-          <div class="frame-gel-num" style="color:${textColor};">${slot.gel_number || '—'}</div>
-          <div class="frame-gel-name" style="color:${subColor};">${slot.gel_name || 'Empty'}</div>
-          <div class="frame-check" style="border-color:${isDark(bgColor) ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.3)'}"></div>
-        </div>
-      `;
-    }).join('');
+    // One frame card. A frame with more than one gel (R02+R132) is split into stacked bands,
+    // each in its own gel's color: the first gel on top, the next below, filling the same card.
+    const frameCard = (slot, label, cls, emptyName) => {
+      const nums = (slot.gel_number || '').split('+').map(x => x.trim()).filter(Boolean);
+      const names = (slot.gel_name || '').split(' + ');
+      const gels = nums.length > 1
+        ? nums.map((n, i) => ({ num: n, name: names.length === nums.length ? names[i] : '' }))
+        : [{ num: slot.gel_number || '—', name: slot.gel_name || emptyName }];
+      const multi = gels.length > 1;
+      const band = (g, i) => {
+        const bg = getGelColor(multi ? g.num : slot.gel_number);
+        const dark = isDark(bg);
+        const sub = dark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.5)';
+        const labelHTML = i === 0 ? `<div class="frame-label" style="color:${sub};">${label}</div>` : '';
+        const num = `<div class="frame-gel-num" style="color:${dark ? '#ffffff' : '#1a1a1a'};">${g.num}</div>`;
+        const name = `<div class="frame-gel-name" style="color:${sub};">${g.name || ''}</div>`;
+        const check = i === gels.length - 1 ? `<div class="frame-check" style="border-color:${dark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.3)'}"></div>` : '';
+        // Several gels share one card: each band is a single line (number, name, and the checkbox on the last)
+        return multi
+          ? `<div class="frame-band" style="background:${bg};">${labelHTML}<div class="band-row">${num}${name}${check}</div></div>`
+          : `<div class="frame-band" style="background:${bg};">${labelHTML}${num}${name}${check}</div>`;
+      };
+      return `<div class="${cls}${gels.length > 1 ? ' multi' : ''}">${gels.map(band).join('')}</div>`;
+    };
 
-    const permHTML = permSlot && permSlot.gel_number ? (() => {
-      const bgColor = getGelColor(permSlot.gel_number);
-      const textColor = isDark(bgColor) ? '#ffffff' : '#1a1a1a';
-      const subColor = isDark(bgColor) ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.5)';
-      return `
-        <div class="perm-card" style="background:${bgColor};">
-          <div class="frame-label" style="color:${subColor};">Permanent</div>
-          <div class="frame-gel-num" style="color:${textColor};">${permSlot.gel_number}</div>
-          <div class="frame-gel-name" style="color:${subColor};">${permSlot.gel_name || ''}</div>
-          <div class="frame-check" style="border-color:${isDark(bgColor) ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.3)'}"></div>
-        </div>
-      `;
-    })() : '';
+    const framesHTML = regularSlots.map(slot => frameCard(slot, `Frame ${slot.slot_number}`, 'frame-card', 'Empty')).join('');
+    const permHTML = permSlot && permSlot.gel_number ? frameCard(permSlot, 'Permanent', 'perm-card', '') : '';
 
     return `
       <div class="spot-card">
@@ -1349,7 +1360,7 @@ function buildColorLoadHTML({ show, spots, colorSlotsBySpot, label }) {
 
   .spots-grid {
     display: grid;
-    grid-template-columns: ${spots.length === 1 ? '1fr' : spots.length === 2 ? '1fr 1fr' : 'repeat(2, 1fr)'};
+    grid-template-columns: ${spots.length === 1 ? '1fr' : spots.length === 2 ? 'minmax(0, 1fr) minmax(0, 1fr)' : 'repeat(2, minmax(0, 1fr))'};
     gap: 16px;
   }
 
@@ -1367,15 +1378,13 @@ function buildColorLoadHTML({ show, spots, colorSlotsBySpot, label }) {
 
   .frames-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr)); /* equal widths, even with long multi-gel names */
     gap: 0;
   }
 
   .frame-card, .perm-card {
-    padding: 12px 10px;
     display: flex;
     flex-direction: column;
-    gap: 3px;
     border-right: 1px solid rgba(0,0,0,0.08);
     border-bottom: 1px solid rgba(0,0,0,0.08);
     min-height: 90px;
@@ -1387,6 +1396,13 @@ function buildColorLoadHTML({ show, spots, colorSlotsBySpot, label }) {
     position: relative;
   }
 
+  .frame-band { flex: 1; padding: 12px 10px; display: flex; flex-direction: column; gap: 3px; }
+  .multi .frame-band { padding: 6px 10px; justify-content: center; }
+  .multi .frame-band + .frame-band { border-top: 1px solid rgba(0,0,0,0.12); }
+  .band-row { display: flex; align-items: center; gap: 6px; min-width: 0; }
+  .multi .frame-gel-num { font-size: 12pt; flex-shrink: 0; }
+  .multi .frame-gel-name { font-size: 7pt; line-height: 1.15; flex: 1; min-width: 0; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  .multi .frame-check { margin-top: 0; flex-shrink: 0; width: 14px; height: 14px; }
   .frame-label { font-size: 7.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
   .frame-gel-num { font-size: 14pt; font-weight: 800; line-height: 1; }
   .frame-gel-name { font-size: 8pt; line-height: 1.3; }
