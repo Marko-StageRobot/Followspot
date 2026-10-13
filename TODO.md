@@ -48,6 +48,7 @@ Plan: `docs/ipad-app-plan.md`. Contract with the desktop: `docs/sync-protocol.md
 - [ ] Buy buttons: switch the "Coming soon" buttons to Stripe checkout links at launch (see the site's README)
 - [ ] Check the Support page's billing answers match how Stripe is set up
 - [ ] Add the promo video when it's finished
+- [ ] **Wording pass (Wheeler):** comb through every page (home, manual, support) and fix the wording. Send edits in any form (marked-up screenshots, pasted text, "change X to Y") and they get applied across all pages
 - [ ] Polish pass (more later)
 
 ## License server (`spotplot-server`)
