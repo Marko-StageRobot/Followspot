@@ -58,7 +58,7 @@ Plan: `docs/ipad-app-plan.md`. Contract with the desktop: `docs/sync-protocol.md
 Plan: `docs/admin-dashboard-plan.md`.
 
 - [ ] **Security, before paying customers:** remove the built-in admin password fallback; generate license keys with secure randomness; move storage from one JSON file to SQLite
-- [ ] Expiry dates on licenses (renews/expires on, grace period), returned to the app by `/validate`
+- [ ] Expiry dates on licenses (renews/expires on), returned to the app by `/validate`, with a 24-hour grace period after a failed payment
 - [ ] Stripe: create and renew licenses automatically from webhooks (Standard and Student, monthly and yearly)
 - [ ] Student plan: .edu email verification
 - [ ] Admin dashboard: home (expiring soon, payments failing, by plan, revenue), search and filters, license page (extend/set expiry, change plan or device limit, revoke/reinstate, resend email, notes), history of every change, CSV export

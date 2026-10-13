@@ -50,7 +50,7 @@ Stripe is the source of truth for money; the license server is the source of tru
 
 - `/validate` returns expires_at, status and grace info.
 - SpotPlot shows "Renews on …" in Settings, and a gentle notice 7 days before an expiry that won't renew.
-- After a failed payment: the license is expired until paid (grace period setting, default 0), with a clear "update your card" link; then the existing expired screen.
+- After a failed payment: 24 hours of full access with a clear "update your card" notice and link; after that, the existing expired screen until payment succeeds.
 - Offline: keep trusting the cached license as today, but no further than its expiry plus grace.
 
 ## Timing (launch January 1, 2027)
@@ -62,7 +62,7 @@ Stripe is the source of truth for money; the license server is the source of tru
 ## Decisions (Wheeler, 2026-10-13)
 
 - **Beta testers don't pay.** Their licenses are `beta`/`comped`; Wheeler sets each end date by hand in the dashboard.
-- **Failed payment = expired until paid.** No grace period by default; the license works again as soon as payment succeeds. (Trade-off noted: Stripe retries cards for several days and most failures are expired cards, so an operator could be locked out mid-tech. Keep the grace period as a setting, default 0, in case this changes.)
+- **Failed payment: 24-hour grace period, then expired until paid.** The app keeps working for 24 hours after a renewal payment fails (with an "update your card" notice), then the license expires; it works again as soon as payment succeeds. The grace length is a server setting (24 hours) so it can be changed without an app update.
 - **Emails:** Stripe sends receipts, failed-payment emails (with a link to update the card), expiring-card notices and renewal reminders, plus the customer portal for updating cards and canceling. SpotPlot only sends its own emails for things Stripe doesn't know about (e.g. a comped beta license nearing its end date).
 
 ## Before launch: legal and tax (check with a lawyer / accountant)
