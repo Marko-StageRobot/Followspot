@@ -8,6 +8,23 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 The owner is a lighting designer, not a professional developer, and built the app through conversations with Claude. Explain changes in plain terms and keep them focused.
 
+## SpotPlot family
+
+The desktop app is one of several projects: the iPad app, the website (spotplotapp.com), the license server and the promo video. `docs/README.md` maps them and how they connect. This repo is home base for the shared docs: `TODO.md` (the one to-do list, by product), `CHANGELOG.md`, `DESIGN.md` (one design language for all of them) and `docs/sync-protocol.md` (the desktop ↔ iPad contract).
+
+## Done means done (every change)
+
+Before calling any change finished, go through this list and do what applies:
+
+1. **TODO.md:** remove the finished item; add any follow-ups to the right product's section.
+2. **CHANGELOG.md:** add a plain-words line under Unreleased if a user would notice the change.
+3. **Show data:** if show data changed (columns, JSON on `shows`, tables, images), run the export/import round-trip test (below) and update `docs/sync-protocol.md` (and the iPad app) so the iPad still understands it.
+4. **iPad Sync API:** if `src/ipadSync.js` changed what it sends or accepts, update `docs/sync-protocol.md`, and bump its version if older iPads would notice.
+5. **Website:** if the change affects how the app works or looks, update the manual or support page in `~/Desktop/spotplot-website` (and its screenshots if they're now wrong). Same for pricing or plan changes.
+6. **Tips:** if a screen's controls changed, check `src/tips.js` still points at real controls with accurate words.
+7. **Design:** new UI follows `DESIGN.md`; a new pattern or color gets added to it.
+8. **Release:** at release time, Unreleased in `CHANGELOG.md` becomes the release notes.
+
 ## Commands
 
 ```bash
@@ -63,6 +80,7 @@ It must print `PASSED`. If you add a new table, a link between rows, or a new ki
 **Release steps:**
 1. Bump the version in `package.json` **and** the hard-coded display string in `src/screens/HomeScreen.jsx` (currently `'Beta 0.3.0'`).
 2. `npm run make`
+   Release notes: turn `CHANGELOG.md`'s Unreleased section into the new version's section (with the date) and use it for the GitHub release text. Check the website manual matches.
 3. Create a GitHub Release tagged `vX.X.X` and upload the DMG plus `make/zip/darwin/arm64/SpotPlot-darwin.zip`. That's the one the postPackage hook writes, at the **project root** `make/`. `out/make/zip/darwin/arm64/SpotPlot-darwin.zip` is a stale leftover from an older hook, so don't upload it.
 
 ## Secrets
@@ -75,4 +93,4 @@ Follow `DESIGN.md` for any new or reworked UI: colors, type sizes, control sizes
 
 ## Roadmap
 
-The to-do list and roadmap live in `TODO.md`. Check it when starting new work and tick items off when they're done.
+The to-do list for every SpotPlot project lives in `TODO.md`, by product, open items only. Check it when starting new work. Finished items are removed and recorded in `CHANGELOG.md` (see Done means done).

@@ -4,6 +4,19 @@ Values come from Apple's **macOS 27 UI Kit** (Sketch, v12, 2026-06-23) and are a
 
 All screens follow this guide as of the design refresh (2026-09-30). New or reworked UI must follow it too.
 
+## One design language across SpotPlot
+
+This guide covers every SpotPlot surface. Use the same tokens everywhere so the products feel like one family:
+
+| Surface | How it applies |
+|---|---|
+| **Desktop app** | Everything below, as written. |
+| **iPad app** | Same colors (window, panels, Apple Blue accent, meaning colors), same dark-only rule and grouped lists, same type scale. Use the iPad's native controls (SwiftUI) at iPad sizes; make cue content even larger, since tablets sit further from the operator in a booth. Highlights (yellow and red) and action icons/colors must match the desktop exactly. |
+| **Website** | `spotplot-website/styles.css` uses the same tokens (black and `#1C1C1E`/`#2A2A2A` surfaces, Apple Blue `#0A84FF`, `#409CFF` links, meaning colors) with Inter as the web stand-in for the system font. |
+| **Printed sheets** | Light, for paper: black headers, gray labels, gel colors as data, `#FFE45C` for color changes, the same yellow/red highlight meanings. Built in `src/pdfGenerator.js`. |
+
+When a color, icon or meaning changes in one place (for example an action's icon or the highlight colors), change it everywhere it appears: desktop, iPad, prints and website screenshots.
+
 ## Principles
 
 - **Dark only.** SpotPlot is used at tech tables and in dark booths. There is no light mode.

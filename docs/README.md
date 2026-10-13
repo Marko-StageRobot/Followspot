@@ -1,0 +1,29 @@
+# The SpotPlot family
+
+SpotPlot is several projects that have to stay in step. This folder (in the desktop app's repo) is home base for everything they share. Each other project points back here.
+
+| Project | What it is | Where | Repo |
+|---|---|---|---|
+| **Desktop app** | The Mac app (Electron + React). Source of truth for every show. | `~/Desktop/followspot` | `wheeler-moon/Followspot` (public) |
+| **iPad app** | Operator tablet app (native Swift). Not started; plan in `ipad-app-plan.md`. | `~/Desktop/spotplot-ipad` (to create) | `wheeler-moon/spotplot-ipad` (to create) |
+| **Website** | spotplotapp.com: home, pricing, manual, support. Plain HTML/CSS on GitHub Pages. | `~/Desktop/spotplot-website` | `wheeler-moon/spotplot-website` (public) |
+| **License server** | Activates and checks license keys; admin page. Pushing `main` deploys to Render. | `~/Desktop/spotplot-server` | `wheeler-moon/spotplot-server` (private) |
+| **Promo video** | 30-second launch video (Remotion), on an invented demo show. Parked. | `~/Desktop/spotplot-video` | none yet |
+
+## Shared documents (all in the desktop repo)
+
+| Document | Covers |
+|---|---|
+| `../TODO.md` | The one to-do list for every project, by product. Open items only. |
+| `../CHANGELOG.md` | Every user-visible change, as it happens. Becomes the release notes. |
+| `../DESIGN.md` | The one design language: desktop app, iPad app, website and printed sheets. |
+| `sync-protocol.md` | The contract between the desktop app and the iPad app. Versioned. |
+| `ipad-app-plan.md` | The iPad app's design and build phases. |
+| `../CLAUDE.md` | How the desktop app is built, plus the "done means done" checklist. |
+
+## How the projects connect
+
+- **Desktop ↔ iPad:** over the local network, defined in `sync-protocol.md`. Show data is the same as a `.spotplot` export (`src/showFile.js`). Any change to show data or to that API must update the protocol doc, and the iPad app if needed.
+- **Desktop ↔ license server:** `src/license.js` calls `spotplot-server.onrender.com` (activate, validate, device limit).
+- **Desktop ↔ website:** the website's download button links to the newest GitHub release's `SpotPlot.dmg`. The manual and support pages describe the app, so they must change when the app does. The app's Help menu and Settings link to spotplotapp.com.
+- **Website ↔ license server:** pricing and Buy buttons will link to Stripe checkout, which issues license keys (not set up yet).
