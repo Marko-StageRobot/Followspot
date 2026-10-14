@@ -46,7 +46,6 @@ Plan: `docs/ipad-app-plan.md`. Contract with the desktop: `docs/sync-protocol.md
 - [ ] Desktop: if SpotPlot crashes with iPad Sync on, the Bonjour announcement can linger until restart; make it stop with the app
 
 ## Website (`spotplot-website`, spotplotapp.com)
-- [ ] Tick "Enforce HTTPS" in GitHub → Settings → Pages once the certificate is ready
 - [ ] Buy buttons: switch the "Coming soon" buttons to Stripe checkout links at launch (see the site's README)
 - [ ] Check the Support page's billing answers match how Stripe is set up
 - [ ] Add the promo video when it's finished
@@ -57,7 +56,6 @@ Plan: `docs/ipad-app-plan.md`. Contract with the desktop: `docs/sync-protocol.md
 
 Plan: `docs/admin-dashboard-plan.md`.
 
-- [ ] **Deploy the two security fixes** (prepared 2026-10-13, not pushed): no built-in admin password fallback, secure license keys. Push `spotplot-server` main after Wheeler's OK; Render restarts in about a minute
 - [ ] Move license storage from one JSON file to SQLite (before Stripe)
 - [ ] Expiry dates on licenses (renews/expires on), returned to the app by `/validate`, with a 24-hour grace period after a failed payment
 - [ ] Stripe: create and renew licenses automatically from webhooks (Standard and Student, monthly and yearly)
