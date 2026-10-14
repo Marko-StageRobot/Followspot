@@ -57,7 +57,8 @@ Plan: `docs/ipad-app-plan.md`. Contract with the desktop: `docs/sync-protocol.md
 
 Plan: `docs/admin-dashboard-plan.md`.
 
-- [ ] **Security, before paying customers:** remove the built-in admin password fallback; generate license keys with secure randomness; move storage from one JSON file to SQLite
+- [ ] **Deploy the two security fixes** (prepared 2026-10-13, not pushed): no built-in admin password fallback, secure license keys. Push `spotplot-server` main after Wheeler's OK; Render restarts in about a minute
+- [ ] Move license storage from one JSON file to SQLite (before Stripe)
 - [ ] Expiry dates on licenses (renews/expires on), returned to the app by `/validate`, with a 24-hour grace period after a failed payment
 - [ ] Stripe: create and renew licenses automatically from webhooks (Standard and Student, monthly and yearly)
 - [ ] Student plan: .edu email verification
