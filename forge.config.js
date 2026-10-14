@@ -19,6 +19,21 @@ module.exports = {
       'entitlements-inherit': 'entitlements.plist',
       // Stop the build on a signing error instead of carrying on unsigned and failing later at notarization
       continueOnError: false,
+      // Only sign actual programs (Mach-O files). The signer otherwise also signs thousands of resource
+      // files (locale.pak, icons…) one by one, each needing Apple's timestamp server, and a single dropped
+      // request fails the build. Resources are covered by the app bundle's own seal anyway.
+      ignore: (filePath) => {
+        const fs = require('fs');
+        try {
+          if (fs.statSync(filePath).isDirectory()) return false;
+          const fd = fs.openSync(filePath, 'r');
+          const magic = Buffer.alloc(4);
+          fs.readSync(fd, magic, 0, 4, 0);
+          fs.closeSync(fd);
+          const MACHO = ['feedface', 'cefaedfe', 'feedfacf', 'cffaedfe', 'cafebabe', 'bebafeca'];
+          return !MACHO.includes(magic.toString('hex'));
+        } catch (e) { return false; }
+      },
     },
     // No osxNotarize here: the postPackage hook re-signs the app (which would void a notarization
     // done at this stage) and then notarizes it once, with retries.

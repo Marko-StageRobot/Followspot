@@ -29,7 +29,8 @@ Before calling any change finished, go through this list and do what applies:
 
 ```bash
 npm start          # dev run (electron-forge start, DevTools open automatically)
-npm run make       # signed + notarized DMG and release zip (macOS, needs signing setup below)
+npm run make       # signed + notarized DMG and release zip (macOS, needs signing setup below).
+                   # scripts/make.js retries up to 3 times when Apple's timestamp server drops a signing request
 ```
 
 There are no tests and no linter (`npm run lint` is a no-op). To verify a change, run the app.
