@@ -501,6 +501,15 @@ function CueRow({ onDragFinished, onCellMenu, cue, isLastCue, fieldsShown, spots
   const [lqVal, setLqVal] = useState(cue.lq_number || '');
 
   useEffect(() => { setLqVal(cue.lq_number || ''); }, [cue.lq_number]);
+  // Script page the cue is on (typed, so "13" or "13a" both work)
+  const [editingPage, setEditingPage] = useState(false);
+  const [pageVal, setPageVal] = useState(cue.page || '');
+  useEffect(() => { setPageVal(cue.page || ''); }, [cue.page]);
+  const savePage = () => {
+    setEditingPage(false);
+    const v = pageVal.trim();
+    if (v !== (cue.page || '')) onUpdateCue(cue.id, 'page', v || null);
+  };
 
   const saveLQ = () => {
     setEditingLQ(false);
@@ -523,7 +532,19 @@ function CueRow({ onDragFinished, onCellMenu, cue, isLastCue, fieldsShown, spots
                 {lqVal || '—'}
               </div>
             )}
-            <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.35)', fontVariantNumeric: 'tabular-nums' }}>T·{cue.track_number}</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '10px', color: 'rgba(255,255,255,0.35)', fontVariantNumeric: 'tabular-nums' }}>
+              <span>T·{cue.track_number}</span>
+              {editingPage ? (
+                <input autoFocus value={pageVal} onChange={e => setPageVal(e.target.value)}
+                  onBlur={savePage} onKeyDown={e => { if (e.key === 'Enter') savePage(); if (e.key === 'Escape') { setPageVal(cue.page || ''); setEditingPage(false); } }}
+                  placeholder="pg" style={{ width: '34px', background: 'rgba(255,255,255,0.05)', border: '1px solid #0A84FF', borderRadius: '4px', color: '#FFFFFF', padding: '0 3px', fontSize: '10px', textAlign: 'center', outline: 'none' }} />
+              ) : (
+                <span onClick={() => setEditingPage(true)} title="Script page"
+                  style={{ cursor: 'pointer', color: pageVal ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.22)' }}>
+                  pg {pageVal || '–'}
+                </span>
+              )}
+            </div>
             <select value={cue.scene_id || ''} onChange={e => onUpdateCue(cue.id, 'scene_id', e.target.value ? parseInt(e.target.value) : null)}
               style={{ width: '74px', height: '20px', background: 'rgba(255,255,255,0.06)', border: 'none', borderRadius: '6px', color: 'rgba(255,255,255,0.45)', padding: '0 4px', fontSize: '10px', outline: 'none', marginTop: '4px' }}>
               <option value="">No scene</option>

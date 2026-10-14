@@ -19,7 +19,6 @@ Current desktop version: **0.3.1** (released 2026-10-14). Changes since then: `C
 - [ ] First-run tips for Show Settings (spots, gels, iris sizes, Cue Settings)
 - [ ] Help → Send Feedback: opens an email to support with the app version filled in
 - [ ] Beta feedback: add items here as testers report them
-- [ ] Page numbers per cue: an optional script page for a cue (e.g. LQ 100 is on page 13), kept small so it doesn't crowd the cue list; shows on prints. New show data: update export/import and `docs/sync-protocol.md`
 - [ ] Grow the cue cell right-click menu (it has Clear cue today) into a full, standard-looking Mac right-click menu: copy/paste a cell, highlight, spot note, ignore… Could switch to Electron's native `Menu.popup` so it's the real macOS menu
 - [ ] Remove color frames: a small red × on each frame in Spot Settings and New Show, so a spot can have just the frames it uses (e.g. 3); everywhere frames are listed (cue list, prints, iPad) shows only those; a way to add frames back. Keep Spot Settings uncluttered
 

@@ -33,7 +33,7 @@ export const TIPS = {
     { id: 'cue-first', target: 'first-cue', title: 'Add your first cue',
       body: 'Each row of the cue list is one light cue, with a column for every spot.' },
     { id: 'cue-lq', target: 'cue-lq', title: 'One row per light cue',
-      body: 'Click the number to type the LQ. The menu under it sets the scene. Press Cmd+= to add a cue.' },
+      body: 'Click the number to type the LQ, and "pg" to note the script page. The menu under it sets the scene. Press Cmd+= to add a cue.' },
     { id: 'cue-action', target: 'cue-action', title: 'What the spot does',
       body: 'Pick an action like Pick Up, Fade Out or Off, then the character. Off means the spot isn\'t used in that cue.' },
     { id: 'cue-look', target: 'cue-look', title: 'Iris and color',

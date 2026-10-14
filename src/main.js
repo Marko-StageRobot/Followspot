@@ -146,6 +146,7 @@ function initSchema() {
   try { db.exec('ALTER TABLE spot_cues ADD COLUMN when_highlight TEXT DEFAULT NULL'); } catch(e) {}
   try { db.exec('ALTER TABLE characters ADD COLUMN print_on_sheet INTEGER DEFAULT 1'); } catch(e) {}
   try { db.exec('ALTER TABLE spot_cues ADD COLUMN notes_highlight TEXT DEFAULT NULL'); } catch(e) {}
+  try { db.exec('ALTER TABLE cues ADD COLUMN page TEXT DEFAULT NULL'); } catch(e) {} // script page, cue list only
   try {
     db.exec('ALTER TABLE spot_cues ADD COLUMN with_lq INTEGER DEFAULT 0');
     // One-time: link "When" text that the old w/LQ button typed in for the cue's current number,
@@ -867,7 +868,7 @@ ipcMain.on('db-get-show-stats', (event, showId) => {
 
   ipcMain.on('db-update-cue', (event, { cueId, field, value }) => {
     try {
-      const safe = ['lq_number','scene_id','caller_notes','rehearsal_notes','ignore','sort_order'];
+      const safe = ['lq_number','scene_id','caller_notes','rehearsal_notes','ignore','sort_order','page'];
       if (!safe.includes(field)) { event.returnValue = { success: false }; return; }
       getDb().prepare(`UPDATE cues SET ${field} = ? WHERE id = ?`).run(value, cueId);
       event.returnValue = { success: true };
