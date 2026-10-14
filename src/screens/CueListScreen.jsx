@@ -151,7 +151,7 @@ function IrisStrip({ sizes, selected, onPick }) {
   );
 }
 
-function SpotCueCell({ spotCue, spot, cue, fieldsShown = {}, characters, colorSlots, onUpdate, onNewCustomCharacter, lqNumber, onDragStart, onDragOver, onDragLeave, onDrop, isDragTarget, onDoubleClick, irisSizes, customActions }) {
+function SpotCueCell({ onDragEnd, spotCue, spot, cue, fieldsShown = {}, characters, colorSlots, onUpdate, onNewCustomCharacter, lqNumber, onDragStart, onDragOver, onDragLeave, onDrop, isDragTarget, onDoubleClick, irisSizes, customActions }) {
   const [showActionPicker, setShowActionPicker] = useState(false);
   const [hoveredFrame, setHoveredFrame] = useState(null);
   const [showCustomTime, setShowCustomTime] = useState(false);
@@ -173,6 +173,7 @@ function SpotCueCell({ spotCue, spot, cue, fieldsShown = {}, characters, colorSl
     <td
       draggable
       onDragStart={onDragStart}
+      onDragEnd={onDragEnd}
       onDragOver={(e) => { 
         e.preventDefault(); 
         e.stopPropagation(); 
@@ -240,6 +241,7 @@ const actionDef = ACTIONS.find(a => a.name === spotCue?.action) || (customAction
       <td
         draggable
         onDragStart={onDragStart}
+      onDragEnd={onDragEnd}
         onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); onDragOver(e); }}
         onDragLeave={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) onDragLeave(e); }}
         onDrop={(e) => { e.preventDefault(); e.stopPropagation(); onDrop(e); }}
@@ -270,6 +272,7 @@ const actionDef = ACTIONS.find(a => a.name === spotCue?.action) || (customAction
     <td
       draggable
       onDragStart={onDragStart}
+      onDragEnd={onDragEnd}
       onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); onDragOver(e); }}
       onDragLeave={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) onDragLeave(e); }}
       onDrop={(e) => { e.preventDefault(); e.stopPropagation(); onDrop(e); }}
@@ -490,7 +493,7 @@ function InsertButton({ onInsert }) {
   );
 }
 
-function CueRow({ cue, isLastCue, fieldsShown, spots, spotCues, characters, colorSlotsBySpot, scenes, onUpdateCue, onUpdateSpotCue, onNewCustomCharacter, onDelete, onInsertAfter, dragSource, dragTarget, setDragSource, setDragTarget, setShowDragModal, onCueDoubleClick, irisSizes, customActions }) {
+function CueRow({ onDragFinished, cue, isLastCue, fieldsShown, spots, spotCues, characters, colorSlotsBySpot, scenes, onUpdateCue, onUpdateSpotCue, onNewCustomCharacter, onDelete, onInsertAfter, dragSource, dragTarget, setDragSource, setDragTarget, setShowDragModal, onCueDoubleClick, irisSizes, customActions }) {
   const [editingLQ, setEditingLQ] = useState(false);
   const [lqVal, setLqVal] = useState(cue.lq_number || '');
 
@@ -542,7 +545,6 @@ function CueRow({ cue, isLastCue, fieldsShown, spots, spotCues, characters, colo
               onDragOver={(e) => { 
                 e.preventDefault(); 
                 e.stopPropagation();
-                console.log('dragover', spot.spot_number, cue.lq_number);
                 setDragTarget({ spotCue: sc, spot, cue }); 
               }}
               onDragLeave={(e) => { 
@@ -551,12 +553,13 @@ function CueRow({ cue, isLastCue, fieldsShown, spots, spotCues, characters, colo
               onDrop={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                console.log('drop fired', sc);
                 if (dragSource && !(dragSource.spot?.id === spot?.id && dragSource.cue?.id === cue?.id)) {
                   setDragTarget({ spotCue: sc, spot, cue });
                   setShowDragModal(true);
+                  onDragFinished(true);
                 }
               }}
+              onDragEnd={() => onDragFinished(false)}
               isDragTarget={dragTarget?.cue?.id === cue?.id && dragTarget?.spot?.id === spot?.id}
               irisSizes={irisSizes}
               customActions={customActions}
@@ -613,6 +616,14 @@ export default function CueListScreen({ show, navigate }) {
   const [listFields, setListFields] = useState({});
   const [customActions, setCustomActions] = useState([]);
   const [dragSource, setDragSource] = useState(null);
+  // A drag that ends anywhere other than another cell (or back on its own cell) clears the highlight.
+  // Drops onto another cell open the copy/swap menu, whose buttons clear it when done.
+  const dropOpenedMenu = useRef(false);
+  const dragFinished = (openedMenu) => {
+    if (openedMenu) { dropOpenedMenu.current = true; return; }
+    if (!dropOpenedMenu.current) { setDragSource(null); setDragTarget(null); }
+    dropOpenedMenu.current = false;
+  };
   const [dragTarget, setDragTarget] = useState(null);
   const [showDragModal, setShowDragModal] = useState(false);
   const [dragModalStep, setDragModalStep] = useState('action');
@@ -924,7 +935,7 @@ const groupedCues = () => {
                       onUpdateCue={updateCue} onUpdateSpotCue={updateSpotCue} onNewCustomCharacter={addCustomCharacterToShow}
                       onDelete={deleteCue} onInsertAfter={insertCueAfter}
                       dragSource={dragSource} dragTarget={dragTarget}
-                      setDragSource={setDragSource} setDragTarget={setDragTarget}
+                      setDragSource={setDragSource} setDragTarget={setDragTarget} onDragFinished={dragFinished}
                       setShowDragModal={setShowDragModal}
                       irisSizes={irisSizes}
                       customActions={customActions}

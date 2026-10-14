@@ -19,7 +19,6 @@ Current desktop version: **0.3.1** (released 2026-10-14). Changes since then: `C
 - [ ] First-run tips for Show Settings (spots, gels, iris sizes, Cue Settings)
 - [ ] Help → Send Feedback: opens an email to support with the app version filled in
 - [ ] Beta feedback: add items here as testers report them
-- [ ] **Bug:** dragging a cue cell and then leaving it where it was keeps that cell highlighted until another drag finishes. Clear the highlight whenever a drag ends without a drop (or the copy/swap menu is canceled)
 - [ ] Page numbers per cue: an optional script page for a cue (e.g. LQ 100 is on page 13), kept small so it doesn't crowd the cue list; shows on prints. New show data: update export/import and `docs/sync-protocol.md`
 - [ ] Right-click menu on a cue cell (nothing happens on right-click today), starting with **Clear cue** (reset that spot's cue to blank). Good home for other actions later (copy, paste, highlight, notes…)
 - [ ] Remove color frames: a small red × on each frame in Spot Settings and New Show, so a spot can have just the frames it uses (e.g. 3); everywhere frames are listed (cue list, prints, iPad) shows only those; a way to add frames back. Keep Spot Settings uncluttered

@@ -6,6 +6,9 @@ Sections: Cue list · Printing · Spots & shows · iPad · Fixes · Other. Websi
 
 ## Unreleased
 
+Fixes
+- Dragging a cue cell and then letting go without moving it no longer leaves the cell highlighted
+
 ## 0.3.1 (2026-10-14)
 
 Cue list
