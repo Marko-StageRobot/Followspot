@@ -20,7 +20,6 @@ Current desktop version: **0.3.1** (released 2026-10-14). Changes since then: `C
 - [ ] Help → Send Feedback: opens an email to support with the app version filled in
 - [ ] Beta feedback: add items here as testers report them
 - [ ] Grow the cue cell right-click menu (it has Clear cue today) into a full, standard-looking Mac right-click menu: copy/paste a cell, highlight, spot note, ignore… Could switch to Electron's native `Menu.popup` so it's the real macOS menu
-- [ ] Remove color frames: a small red × on each frame in Spot Settings and New Show, so a spot can have just the frames it uses (e.g. 3); everywhere frames are listed (cue list, prints, iPad) shows only those; a way to add frames back. Keep Spot Settings uncluttered
 
 - [ ] Print header redesign (Wheeler has opinions): caller sheet header, spot sheet header, and the Color Load page. Waiting on his notes
 

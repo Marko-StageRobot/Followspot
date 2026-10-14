@@ -4,6 +4,7 @@ import Tips from '../components/Tips';
 import { TIPS } from '../tips';
 import CopyColorsSelect from '../components/CopyColorsSelect';
 import { GelFramePicker } from '../components/GelPicker';
+import FrameGrid from '../components/FrameGrid';
 const { ipcRenderer } = window.require('electron');
 
 import { FIXTURES } from '../fixtures';
@@ -85,15 +86,16 @@ function SpotSetup({ spot, spotNumber, onChange, onRemove, otherSpots, onCopyCol
         )}
       </div>
       <label style={{ ...labelStyle, marginBottom: '8px', display: 'block' }}>Color frames</label>
-      <div key={copyCount} data-tour="spot-setup" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginBottom: '8px' }}>
-        {spot.gels.map((gel, i) => (
-          <div key={i} style={{ background: 'rgba(255,255,255,0.05)', borderRadius: '8px', padding: '8px' }}>
-            <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.45)', marginBottom: '4px', fontWeight: '600' }}>Frame {gel.slot}</div>
-            <GelFramePicker gelNumber={gel.gel_number} gelName={gel.gel_name}
-              onChange={gelData => updateGel(i, gelData)}
-              placeholder="Search gel..." />
-          </div>
-        ))}
+      <div key={copyCount} data-tour="spot-setup">
+        <FrameGrid cardBackground="rgba(255,255,255,0.05)"
+          frames={spot.gels.map(g => ({ key: g.slot, ...g }))}
+          onGelChange={(f, gelData) => updateGel(spot.gels.findIndex(g => g.slot === f.slot), gelData)}
+          onRemove={f => onChange({ ...spot, gels: spot.gels.filter(g => g.slot !== f.slot) })}
+          onAdd={() => {
+            let n = 1;
+            while (spot.gels.some(g => g.slot === n)) n++;
+            onChange({ ...spot, gels: [...spot.gels, { slot: n, gel_number: '', gel_name: '' }].sort((a, b) => a.slot - b.slot) });
+          }} />
       </div>
       <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px', color: '#FFFFFF', margin: '4px 0 8px' }}>
         <input type="checkbox" checked={!!(spot.perm_on || spot.perm_gel_number || spot.perm_gel_name)} onChange={e => onChange(e.target.checked ? { ...spot, perm_on: true } : { ...spot, perm_on: false, perm_gel_number: '', perm_gel_name: '' })}

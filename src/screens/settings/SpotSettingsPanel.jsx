@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import SwapSpotsDialog from '../../components/SwapSpotsDialog';
 import CopyColorsSelect from '../../components/CopyColorsSelect';
 import { GelFramePicker } from '../../components/GelPicker';
+import FrameGrid, { RemoveFrameDialog } from '../../components/FrameGrid';
 const { ipcRenderer } = window.require('electron');
 
 import { FIXTURES } from '../../fixtures';
@@ -12,7 +13,23 @@ const inputStyle = {
   fontSize: '13px', outline: 'none', boxSizing: 'border-box',
 };
 
-function SpotCard({ spot, colorSlots, onUpdateSpot, onUpdateGel, onDelete, otherSpots, onCopyColorsFrom, onSetPermanent }) {
+function SpotCard({ spot, colorSlots, onUpdateSpot, onUpdateGel, onDelete, otherSpots, onCopyColorsFrom, onSetPermanent, onSlotsChanged }) {
+  // The frame being removed when cues use it (asks what to do with those cues)
+  const [removing, setRemoving] = useState(null);
+  const removeFrame = (slot, replaceWith) => {
+    const slots = ipcRenderer.sendSync('db-remove-frame', { spotId: spot.id, slotId: slot.id, replaceWith });
+    if (Array.isArray(slots)) onSlotsChanged(spot.id, slots);
+    setRemoving(null);
+  };
+  const askRemoveFrame = (slot) => {
+    const cueCount = ipcRenderer.sendSync('db-frame-usage', { spotId: spot.id, slotNumber: slot.slot_number });
+    if (cueCount > 0) setRemoving({ slot, cueCount });
+    else removeFrame(slot, null);
+  };
+  const addFrame = () => {
+    const slots = ipcRenderer.sendSync('db-add-frame', { spotId: spot.id });
+    if (Array.isArray(slots)) onSlotsChanged(spot.id, slots);
+  };
   const [permJustOn, setPermJustOn] = useState(false);
   // Bumped after a copy so the gel pickers re-read their values
   const [copyCount, setCopyCount] = useState(0);
@@ -80,16 +97,17 @@ function SpotCard({ spot, colorSlots, onUpdateSpot, onUpdateGel, onDelete, other
         </div>
       </div>
       <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.52)', marginBottom: '8px' }}>Color frames</div>
-      <div key={copyCount} style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginBottom: '8px' }}>
-        {regularSlots.map(slot => (
-          <div key={slot.id} style={{ background: '#2A2A2A', borderRadius: '8px', padding: '8px' }}>
-            <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.45)', marginBottom: '4px', fontWeight: '600' }}>Frame {slot.slot_number}</div>
-            <GelFramePicker gelNumber={slot.gel_number} gelName={slot.gel_name}
-              onChange={gel => onUpdateGel(spot.id, slot.id, gel)}
-              placeholder="Search gel..." />
-          </div>
-        ))}
-      </div>
+      <FrameGrid key={copyCount} cardBackground="#2A2A2A"
+        frames={regularSlots.map(s => ({ key: s.id, slot: s.slot_number, gel_number: s.gel_number, gel_name: s.gel_name, row: s }))}
+        onGelChange={(f, gel) => onUpdateGel(spot.id, f.row.id, gel)}
+        onRemove={f => askRemoveFrame(f.row)}
+        onAdd={addFrame} />
+      {removing && (
+        <RemoveFrameDialog slot={removing.slot.slot_number} cueCount={removing.cueCount}
+          otherSlots={regularSlots.filter(s => s.id !== removing.slot.id).map(s => s.slot_number)}
+          onCancel={() => setRemoving(null)}
+          onRemove={replaceWith => removeFrame(removing.slot, replaceWith)} />
+      )}
       {/* Checked when the spot has a permanent gel (or the box was just ticked) */}
       <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px', color: '#FFFFFF', margin: '4px 0 8px' }}>
         <input type="checkbox" checked={!!(permSlot && (permJustOn || permSlot.gel_number || permSlot.gel_name))} onChange={e => { setPermJustOn(e.target.checked); onSetPermanent(spot.id, e.target.checked); }}
@@ -159,6 +177,11 @@ export default function SpotSettingsPanel({ show }) {
     if (sourcePerm && (sourcePerm.gel_number || sourcePerm.gel_name) && !target.some(sl => sl.is_permanent)) {
       target = setPermanent(targetId, true) || target;
     }
+    // Frames the source has but the target was missing come along too (frames are never removed here)
+    for (const sl of source.filter(sl => !sl.is_permanent && !target.some(t => !t.is_permanent && t.slot_number === sl.slot_number))) {
+      target = ipcRenderer.sendSync('db-add-frame', { spotId: targetId, slotNumber: sl.slot_number }) || target;
+    }
+    setColorSlots(prev => ({ ...prev, [targetId]: target }));
     for (const slot of target) {
       const match = source.find(sl => !!sl.is_permanent === !!slot.is_permanent && (slot.is_permanent || sl.slot_number === slot.slot_number));
       updateGel(targetId, slot.id, { gel_number: match?.gel_number || '', gel_name: match?.gel_name || '' });
@@ -187,6 +210,7 @@ export default function SpotSettingsPanel({ show }) {
           otherSpots={spots.filter(s => s.id !== spot.id).map(s => ({ key: s.id, label: 'Spot ' + s.spot_number }))}
           onCopyColorsFrom={sourceId => copyColors(spot.id, sourceId)}
           onSetPermanent={setPermanent}
+          onSlotsChanged={(spotId, slots) => setColorSlots(prev => ({ ...prev, [spotId]: slots }))}
         />
       ))}
             {spots.length < 4 && (

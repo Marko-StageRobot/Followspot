@@ -466,6 +466,43 @@ ipcMain.on('get-app-icon', (event) => {
       event.returnValue = database.prepare('SELECT * FROM color_slots WHERE spot_id = ? ORDER BY is_permanent, slot_number').all(spotId);
     } catch(e) { console.error('Perm slot error:', e); event.returnValue = null; }
   });
+  // Removable color frames (Spot Settings). Frames keep their numbers, so removing Frame 2 of 4
+  // leaves Frames 1, 3, 4; "+ Add frame" brings back the lowest missing number (up to 6).
+  const MAX_FRAMES = 6;
+  const allSlots = (spotId) => getDb().prepare('SELECT * FROM color_slots WHERE spot_id = ? ORDER BY is_permanent, slot_number').all(spotId);
+  const cuesUsingFrame = (spotId, slotNumber) => getDb().prepare('SELECT id, active_frames FROM spot_cues WHERE spot_id = ?').all(spotId)
+    .filter(sc => (sc.active_frames || '').split(',').includes('F' + slotNumber));
+  ipcMain.on('db-frame-usage', (event, { spotId, slotNumber }) => {
+    try { event.returnValue = cuesUsingFrame(spotId, slotNumber).length; } catch(e) { event.returnValue = 0; }
+  });
+  // slotNumber: a particular frame to add (Copy colors); otherwise the lowest missing one
+  ipcMain.on('db-add-frame', (event, { spotId, slotNumber }) => {
+    try {
+      const used = allSlots(spotId).filter(s => !s.is_permanent).map(s => s.slot_number);
+      let n = slotNumber || 1;
+      if (!slotNumber) while (used.includes(n)) n++;
+      if (n <= MAX_FRAMES && !used.includes(n)) getDb().prepare("INSERT INTO color_slots (spot_id, slot_number, is_permanent, gel_number, gel_name) VALUES (?, ?, 0, '', '')").run(spotId, n);
+      event.returnValue = allSlots(spotId);
+    } catch(e) { console.error('Add frame error:', e); event.returnValue = null; }
+  });
+  // replaceWith: another frame number to switch the cues that used this frame to, or null to just take it out of them
+  ipcMain.on('db-remove-frame', (event, { spotId, slotId, replaceWith }) => {
+    try {
+      const database = getDb();
+      const slot = database.prepare('SELECT * FROM color_slots WHERE id = ? AND spot_id = ? AND is_permanent = 0').get(slotId, spotId);
+      if (!slot) { event.returnValue = allSlots(spotId); return; }
+      const from = 'F' + slot.slot_number, to = replaceWith ? 'F' + replaceWith : null;
+      const update = database.prepare('UPDATE spot_cues SET active_frames = ? WHERE id = ?');
+      database.transaction(() => {
+        for (const sc of cuesUsingFrame(spotId, slot.slot_number)) {
+          const frames = sc.active_frames.split(',').filter(Boolean).map(f => f === from ? to : f).filter(Boolean);
+          update.run([...new Set(frames)].join(','), sc.id);
+        }
+        database.prepare('DELETE FROM color_slots WHERE id = ?').run(slotId);
+      })();
+      event.returnValue = allSlots(spotId);
+    } catch(e) { console.error('Remove frame error:', e); event.returnValue = null; }
+  });
   ipcMain.on('db-update-color-slot', (event, { slotId, gel_number, gel_name, gelNumber, gelName }) => {
     try {
       const gNum = gel_number !== undefined ? gel_number : gelNumber;

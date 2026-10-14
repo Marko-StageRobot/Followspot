@@ -127,6 +127,9 @@ Use a switch for any setting that is simply on or off, like the w/LQ toggle.
 ### Segmented controls
 Use one to pick between 2–5 options, like highlight: None / Yellow / Red. Regular height is 24px with radius 6, and the selected segment is a lighter fill (`rgba(255,255,255,0.14)`) or the accent.
 
+### Removable items in a grid (color frames)
+Each item shows a small remove button on hover only: a 16px circle at its top-right, red `×` on a red tint (`rgba(255,69,58,0.16)`). The add tile takes the next grid spot instead of a new row: dashed 1px `rgba(255,255,255,0.2)` border, radius 8, accent-blue "+ Add …" label. Hide it when the grid is full.
+
 ### Right-click (context) menus
 Popover fill `#1A1A1A`, 1px `rgba(255,255,255,0.12)` border, radius 10, 5px padding, popover shadow, about 190px wide. Optional first line: a small Label 2 heading saying what was clicked (e.g. "Spot 1 · LQ 20"). Items are 22px high, Regular 13, radius 6; hover is an accent (`#0A84FF`) fill with white text, like macOS. Destructive items use the red label. An item that can't apply is shown at 30% and does nothing. Closes on click outside, Esc, scroll or leaving the window.
 

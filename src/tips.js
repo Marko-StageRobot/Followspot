@@ -13,7 +13,7 @@ export const TIPS = {
   ],
   newShow: [
     { id: 'new-spot', target: 'spot-setup', title: 'Load each spot\'s colors',
-      body: 'Type a gel number or name in each frame to search the catalog. Tick Permanent color below for a gel that never leaves the fixture.' },
+      body: 'Type a gel number or name in each frame to search the catalog. Hover a frame and click × if the spot doesn\'t have it. Tick Permanent color below for a gel that never leaves the fixture.' },
     { id: 'new-copy', target: 'copy-colors', title: 'Same colors on every spot?',
       body: 'Copy all the color frames from another spot instead of typing them again.' },
     { id: 'new-save', target: 'save-show', title: 'Save when you\'re ready',

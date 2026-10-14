@@ -10,6 +10,9 @@ Cue list
 - Right-click a spot's box in a cue for a menu. **Clear cue** empties it so you can start that cue from scratch (a spot that's Off stays Off). ⌘Z brings it all back
 - Each cue can note its script page: click the small "pg" next to T· and type it (like 13 or 13a)
 
+Spots & shows
+- Spots can have fewer than six color frames. Hover a frame in Spot Settings or New Show and click the small red × to remove it; "+ Add frame" brings it back. Frames keep their numbers (remove Frame 5 and the spot has F1–F4 and F6), and the cue list, prints and color load only show the frames a spot has. If cues use the frame you're removing, you can switch them to another frame or take it out of them
+
 Fixes
 - Dragging a cue cell and then letting go without moving it no longer leaves the cell highlighted
 
