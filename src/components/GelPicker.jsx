@@ -7,7 +7,9 @@ const inputStyle = {
   fontSize: '11px', outline: 'none', boxSizing: 'border-box',
 };
 
-// Search box for one gel from the catalog (or any typed name)
+// Search box for one gel. Pick from the catalog, or type anything: a gel that isn't in the catalog
+// is kept exactly as typed (as its number, so it prints) and is drawn clear/white wherever colors show.
+// Typing an exact catalog number (e.g. "r4615") fills in the proper number and name on leaving the box.
 export function GelPicker({ value, onChange, placeholder }) {
   const [query, setQuery] = useState(value || '');
   const [results, setResults] = useState([]);
@@ -38,7 +40,13 @@ export function GelPicker({ value, onChange, placeholder }) {
       <input style={inputStyle}
         value={query}
         placeholder={placeholder || 'Search gel...'}
-        onChange={e => { setQuery(e.target.value); onChange({ gel_number: '', gel_name: e.target.value }); }}
+        onChange={e => { setQuery(e.target.value); onChange({ gel_number: e.target.value.trim(), gel_name: '' }); }}
+        onBlur={() => {
+          const typed = query.trim();
+          if (!typed) return;
+          const exact = (ipcRenderer.sendSync('db-search-gels', typed) || []).find(g => g.gel_number.toUpperCase() === typed.toUpperCase());
+          if (exact) select(exact);
+        }}
         onFocus={() => query.length > 0 && results.length > 0 && setOpen(true)} />
       {open && (
         <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 1000, background: '#2A2A2A', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '6px', maxHeight: '180px', overflowY: 'auto', marginTop: '2px', minWidth: '220px' }}>
@@ -69,7 +77,10 @@ const splitFrame = (gelNumber, gelName) => {
 };
 const joinFrame = (gels) => {
   const used = gels.filter(g => g.gel_number || g.gel_name);
-  return { gel_number: used.map(g => g.gel_number).filter(Boolean).join('+'), gel_name: used.map(g => g.gel_name).filter(Boolean).join(' + ') };
+  // Names stay paired with numbers: a typed gel with no name stands in with its own text
+  const multi = used.length > 1;
+  return { gel_number: used.map(g => g.gel_number || g.gel_name).filter(Boolean).join('+'),
+    gel_name: multi ? used.map(g => g.gel_name || g.gel_number).join(' + ') : (used[0]?.gel_name || '') };
 };
 
 export function GelFramePicker({ gelNumber, gelName, onChange, placeholder }) {
@@ -83,7 +94,7 @@ export function GelFramePicker({ gelNumber, gelName, onChange, placeholder }) {
       {gels.map((g, i) => (
         <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: i ? '4px' : 0 }}>
           {i > 0 && <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.45)', width: '10px', textAlign: 'center' }}>+</span>}
-          <GelPicker value={g.gel_number ? g.gel_number + ' ' + g.gel_name : g.gel_name}
+          <GelPicker value={[g.gel_number, g.gel_name].filter(Boolean).join(' ')}
             onChange={gel => update(gels.map((x, j) => j === i ? gel : x))}
             placeholder={i ? 'Add gel...' : placeholder} />
           {i > 0 && (

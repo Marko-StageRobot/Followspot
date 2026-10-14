@@ -9,7 +9,7 @@ The one to-do list for every SpotPlot project (see `docs/README.md` for the fami
 
 **Launch target: January 1, 2027** (Standard and Student plans on sale). Everything here is sorted with that date in mind.
 
-Current desktop version: **0.3.0** (released 2026-10-10). Changes since then: `CHANGELOG.md` → Unreleased.
+Current desktop version: **0.3.1** (released 2026-10-14). Changes since then: `CHANGELOG.md` → Unreleased.
 
 ## Desktop app (`followspot`)
 
@@ -23,6 +23,7 @@ Current desktop version: **0.3.0** (released 2026-10-10). Changes since then: `C
 - [ ] Print header redesign (Wheeler has opinions): caller sheet header, spot sheet header, and the Color Load page. Waiting on his notes
 
 ### Later
+- [ ] Gel catalog upkeep: refresh `src/gels.json` from the makers' sites now and then (and bump `GEL_CATALOG_VERSION` in `main.js`). Discontinued gels people still use can be added back on request
 - [ ] Action symbols cheat sheet PDF
 - [ ] Settings popup: more robust app-wide toggles
 - [ ] Finder preview of `.spotplot` files shows that show's logo (the small file icon stays the SpotPlot logo). Needs a Quick Look **Preview** extension (not a Thumbnail extension, which would replace the icon): a small Swift `.appex` that reads the file's JSON, decodes the embedded logo from `images[show.logo_path]`, and shows it, falling back to the SpotPlot icon. Requires Xcode, building the appex as part of `npm run make`, and embedding it in `SpotPlot.app/Contents/PlugIns` before signing/notarizing (app extensions must be sandboxed). Test from a signed, installed build.
@@ -30,14 +31,12 @@ Current desktop version: **0.3.0** (released 2026-10-10). Changes since then: `C
 - [ ] Import a SpotOn file (a CSV export) and automatically build a SpotPlot show from it: spots, cues and each spot's cue data. Needs a sample SpotOn CSV to map its columns
 - [ ] Windows version
 
-### Housekeeping
-- [ ] Commit the dev-only `SPOTPLOT_USER_DATA` switch in `src/main.js` (runs the app on a separate data folder, e.g. the demo show for iPad testing). Uncommitted so far
-
 ## iPad app (`spotplot-ipad`, not created yet)
 
 Plan: `docs/ipad-app-plan.md`. Contract with the desktop: `docs/sync-protocol.md`.
 
 - [ ] Install Xcode (App Store) and run `sudo xcode-select -s /Applications/Xcode.app`
+- [ ] iPad: bundle `src/gels.json` for gel colors (unknown gels draw white), per `docs/sync-protocol.md`
 - [ ] Phase 1, iPad side: find the Mac, pair, pick a show and role, cue list view and PDF view, keep shows for standalone use (desktop side done)
 - [ ] Phase 2: suggestions (When/Notes editing), offline queue, desktop review list, approval switch
 - [ ] Phase 3: live sync while connected

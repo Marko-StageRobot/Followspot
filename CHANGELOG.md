@@ -6,6 +6,8 @@ Sections: Cue list · Printing · Spots & shows · iPad · Fixes · Other. Websi
 
 ## Unreleased
 
+## 0.3.1 (2026-10-14)
+
 Cue list
 - Custom fade times (like 2.5s) now show in the cue list, not just on prints
 - The iris size buttons show a ‹ arrow on the left once you've scrolled, as well as the › arrow on the right, so you can tell there are more sizes either way
@@ -18,7 +20,10 @@ Printing
 Spots & shows
 - A color frame can hold more than one gel (e.g. R02+R132): "+ Add gel" in New Show and Show Settings → Spot Settings
 - Copy colors from… also copies the fixture type
-- New gel: R302 Pale Bastard Amber. Gels added to the catalog now reach everyone's copy of SpotPlot
+- Complete gel catalog: 1,136 gels straight from the makers' current lists: Rosco (Roscolux, Cinegel and CalColor, e.g. R4615), Rosco E-Colour+, Lee (including the 300–700s and Zircon) and GAM GamColor. Names are corrected, and a few numbers that aren't on any maker's list were removed
+- Gel swatches and the Color Load use each gel's real color from the maker
+- Any gel can be typed, even one not in the list: it's kept exactly as typed, prints like any other gel, and shows as clear/white. Typing an exact number (like r4615) fills in its name
+- Gel search puts an exact number match first
 - Show Settings → Iris Sizes: rename any size (including the built-in ones), drag ⠿ to reorder, and Reset a renamed built-in size. Renaming updates every cue that uses it
 - The show dashboard lists spots in number order, whatever order is set in Spot Order
 

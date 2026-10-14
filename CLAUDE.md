@@ -78,7 +78,7 @@ It must print `PASSED`. If you add a new table, a link between rows, or a new ki
 - Build output (`out/`, `make/`, `.webpack/`, `*.zip`, `*.dmg`) is gitignored.
 
 **Release steps:**
-1. Bump the version in `package.json` **and** the hard-coded display string in `src/screens/HomeScreen.jsx` (currently `'Beta 0.3.0'`).
+1. Bump the version in `package.json` **and** the hard-coded display string in `src/screens/HomeScreen.jsx` (currently `'Beta 0.3.1'`).
 2. `npm run make`
    Release notes: turn `CHANGELOG.md`'s Unreleased section into the new version's section (with the date) and use it for the GitHub release text. Check the website manual matches.
 3. Create a GitHub Release tagged `vX.X.X` and upload the DMG plus `make/zip/darwin/arm64/SpotPlot-darwin.zip`. That's the one the postPackage hook writes, at the **project root** `make/`. `out/make/zip/darwin/arm64/SpotPlot-darwin.zip` is a stale leftover from an older hook, so don't upload it.

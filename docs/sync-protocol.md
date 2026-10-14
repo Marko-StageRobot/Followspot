@@ -34,6 +34,8 @@ Auth: `Authorization: Bearer <token>` from pairing. `401` means the iPad was for
 - `version` / `sync_version`: a fingerprint of the show's rows (not images). Same value means the iPad's copy is current.
 - Images are inside the export as base64 (`images[path]`).
 - Color frames can hold several gels: `gel_number` "R02+R132", `gel_name` "Bastard Amber + Quarter Hamburg Frost".
+- A gel can be anything typed (not only catalog numbers): `gel_number` holds the typed text and `gel_name` may be empty. In a multi-gel frame, a typed gel's name stands in as its own text, so names stay paired with numbers.
+- Gel colors: use the same catalog as the desktop, `src/gels.json` ([maker, number, name, color]); the iPad app should bundle a copy. A gel not in the catalog has no color: draw it clear/white.
 - `shows.iris_sizes` is a JSON array `{ label, value, builtin?, key? }` in display order (see `src/irisSizes.js`). `spot_cues.frame_size` holds the size's `value`.
 - `shows.cue_fields` is JSON `{ field: { list, print } }` (see `src/cueFields.js`).
 - When and Notes (`spot_cues.description`, `spot_cues.notes`) contain simple HTML (`<b>`, `<i>`, `<u>`; see `src/richText.js`).
