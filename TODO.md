@@ -31,6 +31,13 @@ Current desktop version: **0.3.1** (released 2026-10-14). Changes since then: `C
 - [ ] Shrink the app (~290 MB → ~100 MB) by rendering PDFs with Electron's built-in Chromium (`webContents.printToPDF` in a hidden window) instead of bundling Chrome for Testing. Smaller downloads and updates, faster notarization, fewer files to sign. **Caution:** an earlier attempt had PDF problems, which is why Chrome was bundled; compare every sheet type against the current output before switching, and keep the bundled Chrome as a fallback until verified.
 - [ ] Import a SpotOn file (a CSV export) and automatically build a SpotPlot show from it: spots, cues and each spot's cue data. Needs a sample SpotOn CSV to map its columns
 - [ ] Windows version
+- [ ] **Make the app's code private** (do it alongside a release). Two repos: `Followspot` goes private (source code); a new public `spotplot-releases` holds only the DMG and zip for each release, with no code. Steps:
+  1. Create `spotplot-releases` (public).
+  2. Point auto-update at it (`update.electronjs.org/wheeler-moon/spotplot-releases/...` in `main.js`) and the website's Download button at its `releases/latest/download/SpotPlot.dmg`.
+  3. Publish that version's release in **both** repos, so installed copies (which still check `Followspot`) update to the version that checks the new repo.
+  4. Once most users are on it, make `Followspot` private and update the release steps in `CLAUDE.md`.
+
+  Beta testers on very old versions may need one manual download. Making it private doesn't erase what was public before; no secrets were ever in it
 
 ## iPad app (`spotplot-ipad`, not created yet)
 
