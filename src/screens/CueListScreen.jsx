@@ -151,7 +151,7 @@ function IrisStrip({ sizes, selected, onPick }) {
   );
 }
 
-function SpotCueCell({ onDragEnd, spotCue, spot, cue, fieldsShown = {}, characters, colorSlots, onUpdate, onNewCustomCharacter, lqNumber, onDragStart, onDragOver, onDragLeave, onDrop, isDragTarget, onDoubleClick, irisSizes, customActions }) {
+function SpotCueCell({ onDragEnd, onContextMenu, spotCue, spot, cue, fieldsShown = {}, characters, colorSlots, onUpdate, onNewCustomCharacter, lqNumber, onDragStart, onDragOver, onDragLeave, onDrop, isDragTarget, onDoubleClick, irisSizes, customActions }) {
   const [showActionPicker, setShowActionPicker] = useState(false);
   const [hoveredFrame, setHoveredFrame] = useState(null);
   const [showCustomTime, setShowCustomTime] = useState(false);
@@ -174,6 +174,7 @@ function SpotCueCell({ onDragEnd, spotCue, spot, cue, fieldsShown = {}, characte
       draggable
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
+      onContextMenu={onContextMenu}
       onDragOver={(e) => { 
         e.preventDefault(); 
         e.stopPropagation(); 
@@ -242,6 +243,7 @@ const actionDef = ACTIONS.find(a => a.name === spotCue?.action) || (customAction
         draggable
         onDragStart={onDragStart}
       onDragEnd={onDragEnd}
+      onContextMenu={onContextMenu}
         onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); onDragOver(e); }}
         onDragLeave={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) onDragLeave(e); }}
         onDrop={(e) => { e.preventDefault(); e.stopPropagation(); onDrop(e); }}
@@ -273,6 +275,7 @@ const actionDef = ACTIONS.find(a => a.name === spotCue?.action) || (customAction
       draggable
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
+      onContextMenu={onContextMenu}
       onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); onDragOver(e); }}
       onDragLeave={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) onDragLeave(e); }}
       onDrop={(e) => { e.preventDefault(); e.stopPropagation(); onDrop(e); }}
@@ -493,7 +496,7 @@ function InsertButton({ onInsert }) {
   );
 }
 
-function CueRow({ onDragFinished, cue, isLastCue, fieldsShown, spots, spotCues, characters, colorSlotsBySpot, scenes, onUpdateCue, onUpdateSpotCue, onNewCustomCharacter, onDelete, onInsertAfter, dragSource, dragTarget, setDragSource, setDragTarget, setShowDragModal, onCueDoubleClick, irisSizes, customActions }) {
+function CueRow({ onDragFinished, onCellMenu, cue, isLastCue, fieldsShown, spots, spotCues, characters, colorSlotsBySpot, scenes, onUpdateCue, onUpdateSpotCue, onNewCustomCharacter, onDelete, onInsertAfter, dragSource, dragTarget, setDragSource, setDragTarget, setShowDragModal, onCueDoubleClick, irisSizes, customActions }) {
   const [editingLQ, setEditingLQ] = useState(false);
   const [lqVal, setLqVal] = useState(cue.lq_number || '');
 
@@ -560,6 +563,7 @@ function CueRow({ onDragFinished, cue, isLastCue, fieldsShown, spots, spotCues, 
                 }
               }}
               onDragEnd={() => onDragFinished(false)}
+              onContextMenu={(e) => { e.preventDefault(); onCellMenu({ x: e.clientX, y: e.clientY, spotCue: sc, spot, cue }); }}
               isDragTarget={dragTarget?.cue?.id === cue?.id && dragTarget?.spot?.id === spot?.id}
               irisSizes={irisSizes}
               customActions={customActions}
@@ -776,6 +780,43 @@ export default function CueListScreen({ show, navigate }) {
     }
   };
 
+  // Right-click menu on a cue cell
+  const [cellMenu, setCellMenu] = useState(null);
+  useEffect(() => {
+    if (!cellMenu) return;
+    const close = () => setCellMenu(null);
+    const onKey = (e) => { if (e.key === 'Escape') close(); };
+    window.addEventListener('mousedown', close);
+    window.addEventListener('keydown', onKey);
+    window.addEventListener('blur', close);
+    const scroller = scrollRef.current;
+    scroller?.addEventListener('scroll', close);
+    return () => {
+      window.removeEventListener('mousedown', close);
+      window.removeEventListener('keydown', onKey);
+      window.removeEventListener('blur', close);
+      scroller?.removeEventListener('scroll', close);
+    };
+  }, [cellMenu]);
+
+  // Clear cue: puts everything this spot does in this cue back to blank. One ⌘Z brings it all back.
+  const BLANK_SPOT_CUE = {
+    action: '', character_id: null, custom_character: null, frame_size: '', intensity: '', fade_time: '',
+    location: '', active_frames: '', description: '', notes: '', ignore: 0, ignored: 0, highlight: null,
+    spot_note: null, no_color: 0, note_checked: 0, when_highlight: null, notes_highlight: null, with_lq: 0,
+  };
+  // A spot that's Off stays Off; only what's filled in gets cleared.
+  const isBlank = (v) => v === null || v === undefined || v === '' || v === 0;
+  const fieldsToClear = (sc) => sc ? Object.keys(BLANK_SPOT_CUE).filter(f => !isBlank(sc[f]) && !(f === 'action' && sc.action === 'Off')) : [];
+  const canClear = (sc) => fieldsToClear(sc).length > 0;
+  const clearSpotCue = (sc) => {
+    const entries = fieldsToClear(sc)
+      .map(field => ({ type: 'spot-cue', spotCueId: sc.id, field, oldValue: sc[field], newValue: BLANK_SPOT_CUE[field] }));
+    if (!entries.length) return;
+    entries.forEach(e => updateSpotCue(sc.id, e.field, e.newValue, true));
+    undoStackRef.current = [...undoStackRef.current.slice(-49), { type: 'batch', entries }];
+  };
+
   const deleteCue = (cueId) => {
     ipcRenderer.sendSync('db-delete-cue', cueId);
     load();
@@ -935,7 +976,7 @@ const groupedCues = () => {
                       onUpdateCue={updateCue} onUpdateSpotCue={updateSpotCue} onNewCustomCharacter={addCustomCharacterToShow}
                       onDelete={deleteCue} onInsertAfter={insertCueAfter}
                       dragSource={dragSource} dragTarget={dragTarget}
-                      setDragSource={setDragSource} setDragTarget={setDragTarget} onDragFinished={dragFinished}
+                      setDragSource={setDragSource} setDragTarget={setDragTarget} onDragFinished={dragFinished} onCellMenu={setCellMenu}
                       setShowDragModal={setShowDragModal}
                       irisSizes={irisSizes}
                       customActions={customActions}
@@ -1062,6 +1103,25 @@ const groupedCues = () => {
           </div>
         </div>
       )}
+        {cellMenu && (() => {
+          const ok = canClear(cellMenu.spotCue);
+          const item = { height: '22px', padding: '0 10px', borderRadius: '6px', display: 'flex', alignItems: 'center', fontSize: '13px' };
+          return (
+            <div onMouseDown={e => e.stopPropagation()} onContextMenu={e => e.preventDefault()}
+              style={{ position: 'fixed', zIndex: 100000, left: Math.min(cellMenu.x, window.innerWidth - 200), top: Math.min(cellMenu.y, window.innerHeight - 70),
+                width: '190px', background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '10px', padding: '5px', boxShadow: '0 18px 48px rgba(0,0,0,0.45)' }}>
+              <div style={{ ...item, fontSize: '11px', color: 'rgba(255,255,255,0.45)', cursor: 'default' }}>
+                Spot {cellMenu.spot?.spot_number} · LQ {cellMenu.cue?.lq_number || '—'}
+              </div>
+              <div onClick={() => { if (ok) { clearSpotCue(cellMenu.spotCue); setCellMenu(null); } }}
+                style={{ ...item, color: ok ? '#FF453A' : 'rgba(255,255,255,0.3)', cursor: ok ? 'default' : 'not-allowed' }}
+                onMouseEnter={e => { if (ok) { e.currentTarget.style.background = '#0A84FF'; e.currentTarget.style.color = '#FFFFFF'; } }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = ok ? '#FF453A' : 'rgba(255,255,255,0.3)'; }}>
+                Clear cue
+              </div>
+            </div>
+          );
+        })()}
         {showDragModal && dragSource && dragTarget && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 99999, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ background: '#2A2A2A', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '16px', padding: '28px', width: '400px' }}>

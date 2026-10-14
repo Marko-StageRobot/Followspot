@@ -6,6 +6,9 @@ Sections: Cue list · Printing · Spots & shows · iPad · Fixes · Other. Websi
 
 ## Unreleased
 
+Cue list
+- Right-click a spot's box in a cue for a menu. **Clear cue** empties it so you can start that cue from scratch (a spot that's Off stays Off). ⌘Z brings it all back
+
 Fixes
 - Dragging a cue cell and then letting go without moving it no longer leaves the cell highlighted
 

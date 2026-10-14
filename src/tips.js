@@ -41,7 +41,7 @@ export const TIPS = {
     { id: 'cue-wlq', target: 'cue-wlq', title: 'w/LQ',
       body: 'Turn this on and the When line reads "w/ LQ" with this cue\'s number. It stays linked if you renumber the cue.' },
     { id: 'cue-cell', target: 'cue-cell', title: 'Do more with a cue',
-      body: 'Double-click a cue for highlights and spot notes. Drag one cue onto another to copy it. In When and Notes, Cmd+B, I and U format the text.' },
+      body: 'Double-click a cue for highlights and spot notes. Drag one cue onto another to copy it, or right-click it to clear it. In When and Notes, Cmd+B, I and U format the text.' },
     { id: 'cue-add', target: 'add-cue-end', title: 'Adding cues',
       body: 'Add a cue at the end here, or hover between two cues to insert one.' },
     { id: 'cue-scene', target: 'add-scene', title: 'Scenes and characters',
