@@ -33,6 +33,7 @@ Auth: `Authorization: Bearer <token>` from pairing. `401` means the iPad was for
 
 - `version` / `sync_version`: a fingerprint of the show's rows (not images). Same value means the iPad's copy is current.
 - Images are inside the export as base64 (`images[path]`).
+- Spot numbers can have gaps (a show can have Spots 1 and 3): use each spot's `spot_number`, never its position in the list.
 - A spot's frames are its `color_slots` rows with `is_permanent = 0`. A spot can have fewer than six, and numbers can have gaps (e.g. 1, 2, 3, 4, 6): show only the frames that exist, by `slot_number`. `spot_cues.active_frames` ("F1,F3") only names frames that exist.
 - Color frames can hold several gels: `gel_number` "R02+R132", `gel_name` "Bastard Amber + Quarter Hamburg Frost".
 - A gel can be anything typed (not only catalog numbers): `gel_number` holds the typed text and `gel_name` may be empty. In a multi-gel frame, a typed gel's name stands in as its own text, so names stay paired with numbers.

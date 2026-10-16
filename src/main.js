@@ -521,7 +521,7 @@ ipcMain.on('get-app-icon', (event) => {
         database.prepare('INSERT INTO color_slots (spot_id, slot_number, is_permanent, gel_number, gel_name) VALUES (?, ?, 0, ?, ?)').run(spotId, i, '', '');
       }
       database.prepare('INSERT INTO color_slots (spot_id, slot_number, is_permanent, gel_number, gel_name) VALUES (?, NULL, 1, ?, ?)').run(spotId, '', '');
-      database.prepare('UPDATE shows SET num_spots = ? WHERE id = ?').run(spotNumber, showId);
+      database.prepare('UPDATE shows SET num_spots = (SELECT COUNT(*) FROM spots WHERE show_id = ?) WHERE id = ?').run(showId, showId);
       // Create spot_cue records for all existing cues
       const existingCues = database.prepare('SELECT * FROM cues WHERE show_id = ?').all(showId);
       for (const cue of existingCues) {
@@ -544,15 +544,18 @@ ipcMain.on('get-app-icon', (event) => {
       event.returnValue = { success: false, error: e.message };
     }
   });
-  ipcMain.on('db-remove-spot', (event, spotId) => {
+  // Delete a spot. The other spots keep their numbers (delete Spot 2 and the show has Spots 1 and 3)
+  // unless renumber is set, which closes the gap in number order (Spot 3 becomes Spot 2).
+  ipcMain.on('db-remove-spot', (event, arg) => {
     try {
+      const { spotId, renumber } = typeof arg === 'object' ? arg : { spotId: arg, renumber: false };
       const database = getDb();
       const spot = database.prepare('SELECT * FROM spots WHERE id = ?').get(spotId);
       database.prepare('DELETE FROM spot_cues WHERE spot_id = ?').run(spotId);
       database.prepare('DELETE FROM color_slots WHERE spot_id = ?').run(spotId);
       database.prepare('DELETE FROM spots WHERE id = ?').run(spotId);
-      const remaining = database.prepare('SELECT * FROM spots WHERE show_id = ? ORDER BY COALESCE(display_order, spot_number * 1000)').all(spot.show_id);
-      remaining.forEach((s, i) => database.prepare('UPDATE spots SET spot_number = ? WHERE id = ?').run(i + 1, s.id));
+      const remaining = database.prepare('SELECT * FROM spots WHERE show_id = ? ORDER BY spot_number').all(spot.show_id);
+      if (renumber) remaining.forEach((s, i) => database.prepare('UPDATE spots SET spot_number = ? WHERE id = ?').run(i + 1, s.id));
       database.prepare('UPDATE shows SET num_spots = ? WHERE id = ?').run(remaining.length, spot.show_id);
       event.returnValue = { success: true };
     } catch(e) { event.returnValue = { success: false }; }
