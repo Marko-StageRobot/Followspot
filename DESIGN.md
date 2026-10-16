@@ -130,6 +130,9 @@ Use one to pick between 2–5 options, like highlight: None / Yellow / Red. Regu
 ### Removable items in a grid (color frames)
 Each item shows a small remove button on hover only: a 16px circle at its top-right, red `×` on a red tint (`rgba(255,69,58,0.16)`). The add tile takes the next grid spot instead of a new row: dashed 1px `rgba(255,255,255,0.2)` border, radius 8, accent-blue "+ Add …" label. Hide it when the grid is full.
 
+### Gel chips
+A compact way to show a spot's frames in one row: the chips share the row's width (never wrapping), each taking the room its gel number needs, each with a 5px color strip on top (the gel's color; several gels sit side by side; empty is a dashed outline), the frame label below (F1…, Bold 9, Label 3) and the gel number (Medium 11), cut short with "…" if the row is narrow. Fill 3 background, radius 5, 3px apart. The permanent frame gets a gold outline and a gold "PERM" label. Hover shows the full gel. Used in the cue list header's color load.
+
 ### Right-click (context) menus
 Popover fill `#1A1A1A`, 1px `rgba(255,255,255,0.12)` border, radius 10, 5px padding, popover shadow, about 190px wide. Optional first line: a small Label 2 heading saying what was clicked (e.g. "Spot 1 · LQ 20"). Items are 22px high, Regular 13, radius 6; hover is an accent (`#0A84FF`) fill with white text, like macOS. Destructive items use the red label. An item that can't apply is shown at 30% and does nothing. Closes on click outside, Esc, scroll or leaving the window.
 

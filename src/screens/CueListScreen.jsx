@@ -496,6 +496,54 @@ function InsertButton({ onInsert }) {
   );
 }
 
+// Header button that shows/hides a spot's color load: a few of the spot's colors as overlapping dots
+function ColorLoadButton({ slots, open, onClick }) {
+  const colors = slots.filter(sl => sl.gel_number).slice(0, 3).map(sl => getGelColor(sl.gel_number));
+  return (
+    <button onClick={onClick} title={open ? 'Hide color load' : 'Show color load'} aria-label={open ? 'Hide color load' : 'Show color load'} aria-expanded={open}
+      style={{ flexShrink: 0, height: '22px', display: 'flex', alignItems: 'center', gap: '5px', padding: '0 7px', marginTop: '2px', border: 'none', borderRadius: '6px', cursor: 'pointer',
+        background: open ? 'rgba(10,132,255,0.22)' : 'rgba(255,255,255,0.08)', color: open ? '#409CFF' : 'rgba(255,255,255,0.55)' }}>
+      <span style={{ display: 'flex' }}>
+        {(colors.length ? colors : ['#3a3a3a']).map((c, i) => (
+          <span key={i} style={{ width: '9px', height: '9px', borderRadius: '50%', background: c, marginLeft: i ? '-3px' : 0, boxShadow: '0 0 0 1.5px #262626' }} />
+        ))}
+      </span>
+      <span style={{ fontSize: '9px', lineHeight: 1 }}>{open ? '▲' : '▼'}</span>
+    </button>
+  );
+}
+
+// A spot's full color load, shown under its name in the cue list header. Always one row: the
+// chips share the column's width, each taking the room its gel number needs (a color strip on top,
+// then the frame and gel number), and a long
+// gel number is cut short with "…" in a narrow column. Hover a chip for the full gel name.
+function HeaderColorLoad({ slots, perm }) {
+  const chip = (key, label, gelNumber, gelName, isPerm) => {
+    const nums = (gelNumber || '').split('+').map(g => g.trim()).filter(Boolean);
+    const colors = nums.map(n => gelColor(n) || '#FFFFFF');
+    // A frame with several gels shows each gel's color side by side in the strip
+    const strip = !nums.length ? 'transparent'
+      : colors.length === 1 ? colors[0]
+      : `linear-gradient(to right, ${colors.map((c, i) => `${c} ${(i * 100) / colors.length}% ${((i + 1) * 100) / colors.length}%`).join(', ')})`;
+    const text = { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%' };
+    return (
+      <div key={key} title={[label, gelNumber, gelName].filter(Boolean).join(' · ') || label + ' · Empty'}
+        style={{ flex: '1 1 auto', minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px', padding: '3px 2px 4px', borderRadius: '5px',
+          background: 'rgba(255,255,255,0.06)', border: isPerm ? '1px solid rgba(255,214,10,0.35)' : '1px solid transparent' }}>
+        <div style={{ alignSelf: 'stretch', height: '5px', borderRadius: '2px', background: strip, border: nums.length ? 'none' : '1px dashed rgba(255,255,255,0.25)', boxSizing: 'border-box' }} />
+        <div style={{ ...text, fontSize: '9px', fontWeight: '600', color: isPerm ? '#C8A26B' : 'rgba(255,255,255,0.45)' }}>{label}</div>
+        <div style={{ ...text, fontSize: '10.5px', fontWeight: '500', letterSpacing: '-0.01em', color: nums.length ? '#FFFFFF' : 'rgba(255,255,255,0.3)' }}>{nums.length ? nums.join('+') : '—'}</div>
+      </div>
+    );
+  };
+  return (
+    <div style={{ display: 'flex', gap: '2px', marginTop: '7px' }}>
+      {slots.map(sl => chip(sl.id, 'F' + sl.slot_number, sl.gel_number, sl.gel_name, false))}
+      {perm && chip('perm', 'PERM', perm.gel_number, perm.gel_name, true)}
+    </div>
+  );
+}
+
 function CueRow({ onDragFinished, onCellMenu, cue, isLastCue, fieldsShown, spots, spotCues, characters, colorSlotsBySpot, scenes, onUpdateCue, onUpdateSpotCue, onNewCustomCharacter, onDelete, onInsertAfter, dragSource, dragTarget, setDragSource, setDragTarget, setShowDragModal, onCueDoubleClick, irisSizes, customActions }) {
   const [editingLQ, setEditingLQ] = useState(false);
   const [lqVal, setLqVal] = useState(cue.lq_number || '');
@@ -606,6 +654,17 @@ export default function CueListScreen({ show, navigate }) {
   const [data, setData] = useState({ spots: [], scenes: [], cues: [], spotCues: [] });
   const [characters, setCharacters] = useState([]);
   const [colorSlotsBySpot, setColorSlotsBySpot] = useState({});
+  const [permSlotBySpot, setPermSlotBySpot] = useState({});
+  // Spots whose color load is shown in the header. Remembered per show on this Mac (not show data).
+  const colorLoadKey = 'spotplot_cuelist_colorload_' + show.id;
+  const [openColorLoads, setOpenColorLoads] = useState(() => {
+    try { return JSON.parse(localStorage.getItem(colorLoadKey)) || []; } catch (e) { return []; }
+  });
+  const toggleColorLoad = (spotId) => setOpenColorLoads(prev => {
+    const next = prev.includes(spotId) ? prev.filter(id => id !== spotId) : [...prev, spotId];
+    try { localStorage.setItem(colorLoadKey, JSON.stringify(next)); } catch (e) {}
+    return next;
+  });
   const [showSceneModal, setShowSceneModal] = useState(false);
   const [showCharModal, setShowCharModal] = useState(false);
   const [newSceneLabel, setNewSceneLabel] = useState('');
@@ -670,12 +729,14 @@ export default function CueListScreen({ show, navigate }) {
     setLoaded(true);
     const chars = ipcRenderer.sendSync('db-get-characters', show.id);
     setCharacters(Array.isArray(chars) ? chars : []);
-    const slotsBySpot = {};
+    const slotsBySpot = {}, permBySpot = {};
     for (const spot of (safe.spots || [])) {
-      const slots = ipcRenderer.sendSync('db-get-color-slots', spot.id);
-      slotsBySpot[spot.id] = Array.isArray(slots) ? slots : [];
+      const all = ipcRenderer.sendSync('db-get-color-slots-all', spot.id);
+      slotsBySpot[spot.id] = (Array.isArray(all) ? all : []).filter(sl => !sl.is_permanent);
+      permBySpot[spot.id] = (Array.isArray(all) ? all : []).find(sl => sl.is_permanent && (sl.gel_number || sl.gel_name)) || null;
     }
     setColorSlotsBySpot(slotsBySpot);
+    setPermSlotBySpot(permBySpot);
     const updatedShow = ipcRenderer.sendSync('db-get-show', show.id);
     // The show's iris sizes in order (defaults, possibly renamed or moved, plus custom ones)
     setIrisSizes(irisSizeList(updatedShow?.iris_sizes));
@@ -974,9 +1035,18 @@ const groupedCues = () => {
               <tr style={{ background: '#262626', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
                 <th style={{ padding: '8px', textAlign: 'left', fontSize: '10px', color: 'rgba(255,255,255,0.28)', fontWeight: '600', width: '90px', borderRight: '1px solid rgba(255,255,255,0.06)' }}>CUE</th>
                 {(data?.spots || []).map(spot => (
-                  <th key={spot.id} style={{ padding: '8px 18px', textAlign: 'left', borderRight: '1px solid rgba(255,255,255,0.12)', minWidth: '260px', width: `${100 / (data?.spots || []).length}%` }}>
-                    <div style={{ fontSize: '13px', color: '#409CFF', fontWeight: '700' }}>SPOT {spot.spot_number}</div>
-                    {spot.operator_name && <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.62)', fontWeight: '500', marginTop: '1px' }}>{spot.operator_name}</div>}
+                  <th key={spot.id} style={{ padding: '8px 18px', textAlign: 'left', verticalAlign: 'top', borderRight: '1px solid rgba(255,255,255,0.12)', minWidth: '260px', width: `${100 / (data?.spots || []).length}%` }}>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: '13px', color: '#409CFF', fontWeight: '700' }}>SPOT {spot.spot_number}</div>
+                        {spot.operator_name && <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.62)', fontWeight: '500', marginTop: '1px' }}>{spot.operator_name}</div>}
+                      </div>
+                      <ColorLoadButton slots={colorSlotsBySpot[spot.id] || []} open={openColorLoads.includes(spot.id)}
+                        onClick={() => toggleColorLoad(spot.id)} />
+                    </div>
+                    {openColorLoads.includes(spot.id) && (
+                      <HeaderColorLoad slots={colorSlotsBySpot[spot.id] || []} perm={permSlotBySpot[spot.id]} />
+                    )}
                   </th>
                 ))}
               </tr>
