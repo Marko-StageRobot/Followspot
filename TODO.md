@@ -77,6 +77,8 @@ Plan: `docs/admin-dashboard-plan.md`.
 - [ ] Stripe integration. Plans: Standard $15/month or $144/year; Student $8/month or $72/year (.edu). Launch with Standard and Student in January; Production tier Q1 after launch; Education tier Q2
 - [ ] Production plan: revisit the device count (spots × 2 + 2), since iPads are free and don't need licenses
 - [ ] Windows distribution
+- [ ] **Student license term:** a Student license lasts 4 years or until the student's graduation date, whichever comes sooner (the website's Support page already says so). Needs: an end date on student licenses in the license server, collecting the graduation date at signup (with .edu verification), and a reminder email before it ends with an offer to move to Standard
+- [ ] Keep the 2-Mac limit unadvertised: the website and marketing never mention how many Macs a license covers (Wheeler, 2026-10-16). The app still enforces it; the "License in use on 2 Macs" screen is the only place it shows
 
 ## Marketing
 - [ ] Promo video (`~/Desktop/spotplot-video`): **parked until about mid-November**, while the product gets finished. A rough first cut exists (silent, 16:9); expect to rework it once the app and iPad app are closer to launch (see its README)
