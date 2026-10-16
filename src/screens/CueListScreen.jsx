@@ -793,6 +793,10 @@ export default function CueListScreen({ show, navigate }) {
             } else if (last.type === 'cue') {
             ipcRenderer.sendSync('db-update-cue', { cueId: last.cueId, field: last.field, value: last.oldValue });
             setData(d => ({ ...d, cues: (d?.cues || []).map(c => c.id === last.cueId ? { ...c, [last.field]: last.oldValue } : c) }));
+          } else if (last.type === 'tracks') {
+            ipcRenderer.sendSync('db-restore-tracks', { showId: show.id, tracks: last.before });
+            const old = new Map(last.before.map(t => [t.id, t.track_number]));
+            setData(d => ({ ...d, cues: (d?.cues || []).map(c => old.has(c.id) ? { ...c, track_number: old.get(c.id) } : c) }));
           } else if (last.type === 'batch') {
             last.entries.forEach(entry => {
               if (entry.type === 'spot-cue') {
@@ -943,9 +947,12 @@ export default function CueListScreen({ show, navigate }) {
     const ordered = [...shown, ...rest];
     if (!ordered.length) return;
     if (ordered.every((c, i) => c.track_number === i + 1)) { alert('T· numbers are already in order (1 to ' + ordered.length + ').'); return; }
-    if (!window.confirm(`Renumber spot cues T·1 to T·${ordered.length}, top to bottom?\n\nT· numbers are the spot cue numbers operators use to keep their place, printed beside each LQ. Renumbering cleans them up after cues were inserted.\n\nThe order of your cues, their scenes and LQ numbers won't change. If you've already handed out sheets, reprint them so everyone's T· numbers match.`)) return;
+    if (!window.confirm(`Renumber spot cues T·1 to T·${ordered.length}, top to bottom?\n\nT· numbers are the spot cue numbers operators use to keep their place, printed beside each LQ. Renumbering cleans them up after cues were inserted.\n\nThe order of your cues, their scenes and LQ numbers won't change. If you've already handed out sheets, reprint them so everyone's T· numbers match.\n\nChanged your mind? Press ⌘Z to put the old numbers back.`)) return;
+    const before = (data?.cues || []).map(c => ({ id: c.id, track_number: c.track_number }));
     const result = ipcRenderer.sendSync('db-renumber-tracks', { showId: show.id, cueIds: ordered.map(c => c.id) });
     if (!result?.success) { alert('Could not renumber: ' + (result?.error || 'unknown error')); return; }
+    // One ⌘Z puts every cue's old T· number back
+    undoStackRef.current = [...undoStackRef.current.slice(-49), { type: 'tracks', before }];
     load();
   };
 

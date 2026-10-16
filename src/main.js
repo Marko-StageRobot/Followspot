@@ -806,6 +806,17 @@ ipcMain.on('db-get-show-stats', (event, showId) => {
 
   // Renumber T· (track numbers) 1, 2, 3… in the order the cue list shows. cueIds is that order.
   // Only track_number changes: cue order (sort_order), scenes and LQ numbers are never touched.
+  // Undo for Renumber T·: puts back each cue's previous T· number ([{ id, track_number }], this show's cues only)
+  ipcMain.on('db-restore-tracks', (event, { showId, tracks }) => {
+    try {
+      const database = getDb();
+      const setTrack = database.prepare('UPDATE cues SET track_number = ? WHERE id = ? AND show_id = ?');
+      database.transaction(() => { tracks.forEach(t => setTrack.run(t.track_number, t.id, showId)); })();
+      event.returnValue = { success: true };
+    } catch(e) {
+      event.returnValue = { success: false, error: e.message };
+    }
+  });
   ipcMain.on('db-renumber-tracks', (event, { showId, cueIds }) => {
     try {
       const database = getDb();
