@@ -15,6 +15,7 @@ Current desktop version: **0.3.1** (released 2026-10-14). Changes since then: `C
 
 ### Next (0.4.0)
 - [ ] Faster cue list loading: big shows take a couple of seconds to open
+- [ ] Update notices: today the ~290 MB update downloads silently and only one box appears at the end ("ready to install"), and the app checks only once, 10 seconds after opening. Show a small "Downloading SpotPlot X.X.X…" notice when a download starts (Electron's `autoUpdater` `update-available` event), re-check every few hours while the app is open, and make SpotPlot → Check for Updates… say "You're up to date" or "Downloading…" instead of doing nothing visible. Only helps once people have 0.4.0
 - [ ] Undo for Renumber T·
 - [ ] First-run tips for Show Settings (spots, gels, iris sizes, Cue Settings)
 - [ ] Help → Send Feedback: opens an email to support with the app version filled in
