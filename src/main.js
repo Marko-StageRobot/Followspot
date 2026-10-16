@@ -1024,6 +1024,13 @@ app.whenReady().then(async () => {
     getDb();
 
   const { Menu, shell } = require('electron');
+  // Help → Send Feedback / Contact Support: an email to support with the version details filled in,
+  // so nobody has to look them up
+  const emailSupport = (subject, prompt) => {
+    const details = `SpotPlot ${app.getVersion()} · macOS ${process.getSystemVersion()} · ${process.arch === 'arm64' ? 'Apple silicon' : 'Intel'} Mac`;
+    const body = `${prompt}\n\n\n\n---\n${details}`;
+    shell.openExternal(`mailto:wheeler@wheelermoon.com?subject=${encodeURIComponent(subject + ' (' + app.getVersion() + ')')}&body=${encodeURIComponent(body)}`);
+  };
   const template = [
     {
       label: 'SpotPlot',
@@ -1093,7 +1100,8 @@ app.whenReady().then(async () => {
         { label: 'Show Tips Again', click: () => { mainWindow.webContents.send('menu-show-tips'); } },
         { type: 'separator' },
         { label: 'SpotPlot Website', click: () => { shell.openExternal('https://spotplotapp.com'); } },
-        { label: 'Contact Support', click: () => { shell.openExternal('mailto:wheeler@wheelermoon.com'); } },
+        { label: 'Send Feedback…', click: () => emailSupport('SpotPlot feedback', 'What would you like to tell us? Ideas, bugs, anything.') },
+        { label: 'Contact Support', click: () => emailSupport('SpotPlot support', 'What happened, and what were you doing when it happened? A screenshot helps.') },
       ],
     },
   ];
