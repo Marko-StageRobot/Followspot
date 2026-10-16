@@ -8,6 +8,7 @@ Sections: Cue list · Printing · Spots & shows · iPad · Fixes · Other. Websi
 
 Cue list
 - Right-click a spot's box in a cue for a menu. **Clear cue** empties it so you can start that cue from scratch (a spot that's Off stays Off). ⌘Z brings it all back
+- Double-clicking a word in When or Notes selects that word, like any text box. Double-click anywhere else in a spot's box to open its options
 - Each cue can note its script page: click the small "pg" next to T· and type it (like 13 or 13a)
 
 Spots & shows

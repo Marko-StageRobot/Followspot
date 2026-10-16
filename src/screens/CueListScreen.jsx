@@ -588,7 +588,11 @@ function CueRow({ onDragFinished, onCellMenu, cue, isLastCue, fieldsShown, spots
               isDragTarget={dragTarget?.cue?.id === cue?.id && dragTarget?.spot?.id === spot?.id}
               irisSizes={irisSizes}
               customActions={customActions}
-              onDoubleClick={() => onCueDoubleClick(cue, spot, sc)}
+              onDoubleClick={(e) => {
+                // Inside a text box (When, Notes, a typed name or time), double-click selects a word as usual
+                if (e.target.closest('input, textarea, [contenteditable]')) return;
+                onCueDoubleClick(cue, spot, sc);
+              }}
             />
           );
         })}
