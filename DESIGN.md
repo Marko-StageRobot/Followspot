@@ -149,6 +149,15 @@ Height 24px, radius 6, bordered-button fill, with a chevron on the right.
 ## Spacing
 Use a **4px grid**: 4, 8, 12, 16, 20, 24. Dialog and panel margins are 16px, which is what the kit's alerts use. Put 8px between related controls and 16–24px between groups.
 
+## Motion
+Apple-style: calm, smooth and quick to settle. Things ease into place; they never bounce or spin.
+- **Easing:** `cubic-bezier(0.22, 1, 0.36, 1)` (fast start, long gentle finish) for anything that moves.
+- **Durations:** hover and press 0.2–0.5s; entrances 1–1.4s; nothing loops.
+- **Hover and press:** buttons grow to 103% on hover and 97% while pressed; cards and plans lift 4px with a slightly lighter fill and brighter border; screenshots zoom 1.5%.
+- **Entrances (website):** content rises about 44px while fading in as it scrolls into view (screenshots also grow from 95%); items in a row are staggered 40–90ms apart. The hero eases in line by line on load, and its screenshot grows from 90% to full size as it scrolls up the screen. Gradient headlines sweep their color in.
+- **Reduce motion:** when the system's Reduce motion setting is on, nothing moves; only colors change. The page must read fine with motion off or scripts blocked.
+- In the app, keep motion small and functional (menus, sheets, highlights). Big entrances belong on the website.
+
 ## Implementation notes
 - Styles are currently inline objects in each screen, with hard-coded hex values; for example `#2a2a2a` appears about 120 times. As part of the refresh, move these values into one shared file (for example `src/theme.js`) and import them. Then a future color change is one edit, not a hunt through every screen.
 - The kit's cursor SVGs don't need to be used. macOS supplies cursors, so use CSS `cursor` values.
