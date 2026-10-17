@@ -5,7 +5,7 @@ SpotPlot is several projects that have to stay in step. This folder (in the desk
 | Project | What it is | Where | Repo |
 |---|---|---|---|
 | **Desktop app** | The Mac app (Electron + React). Source of truth for every show. | `~/Desktop/followspot` | `wheeler-moon/Followspot` (public) |
-| **iPad app** | Operator tablet app (native Swift / SwiftUI). Phase 1 built (find the Mac, pair, cue list, paperwork, updates, show files); plan in `ipad-app-plan.md`, build notes in its own `CLAUDE.md`. | `~/Desktop/spotplot-ipad` | `wheeler-moon/spotplot-ipad` (private, to create) |
+| **iPad app** | Operator tablet app (native Swift / SwiftUI). Phase 1 built (find the Mac, pair, cue list, paperwork, updates, show files); plan in `ipad-app-plan.md`, build notes in its own `CLAUDE.md`. | `~/Desktop/spotplot-ipad` | `wheeler-moon/spotplot-ipad` (private) |
 | **Website** | spotplotapp.com: home, pricing, manual, support. Plain HTML/CSS on GitHub Pages. | `~/Desktop/spotplot-website` | `wheeler-moon/spotplot-website` (public) |
 | **License server** | Activates and checks license keys; admin page. Pushing `main` deploys to Render. | `~/Desktop/spotplot-server` | `wheeler-moon/spotplot-server` (private) |
 | **Promo video** | 30-second launch video (Remotion), on an invented demo show. Parked. | `~/Desktop/spotplot-video` | none yet |

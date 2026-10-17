@@ -42,7 +42,6 @@ Current desktop version: **0.3.1** (released 2026-10-14). Changes since then: `C
 Plan: `docs/ipad-app-plan.md`. Contract with the desktop: `docs/sync-protocol.md`.
 
 - [ ] Phase 1 finish: check landscape (When and Notes get separate columns), run on a real iPad (needs the Apple Developer team set in Xcode → Signing), and check text size in a dark booth. Built and tested in the simulator 2026-10-17: find the Mac, pair, download, Spot and Caller cue lists, Paperwork, update banner with See Changes, opening `.spotplot` files
-- [ ] Create the private GitHub repo `spotplot-ipad` and push the first commit
 - [ ] Keep the iPad's copies in step: `Resources/gels.json` (from `src/gels.json`) and `Resources/action-icons.json` (from the ActionIcon SVGs in `src/screens/CueListScreen.jsx`) whenever those change
 - [ ] Phase 2: suggestions (When/Notes editing), offline queue, desktop review list, approval switch
 - [ ] Phase 3: live sync while connected
