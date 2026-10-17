@@ -13,6 +13,11 @@ Cue list
 - Renumber T· can be undone: press ⌘Z right after to put every cue's old T· number back
 - Each cue can note its script page: click the small "pg" next to T· and type it (like 13 or 13a)
 
+Printing
+- New: **Action key**, one page showing every action symbol and its name, including your show's custom actions. "Only this show's actions" leaves out the ones no cue uses
+- New: **Scene list**, every scene in order with its song, number of cues, LQ and T· range and script pages, with act breaks marked
+- New **Cover page** switch for the caller sheet and spot sheets: a bordered first page with the label, the show name and a large logo, the theatre and producer, each spot's number, operator, position and fixture with its color load (just that spot's on a spot sheet; on the caller sheet every spot's frames line up in the same columns), a key to the action symbols the show uses, and the lighting team along the bottom
+
 Spots & shows
 - Spots can have fewer than six color frames. Hover a frame in Spot Settings or New Show and click the small red × to remove it; "+ Add frame" brings it back. Frames keep their numbers (remove Frame 5 and the spot has F1–F4 and F6), and the cue list, prints and color load only show the frames a spot has. If cues use the frame you're removing, you can switch them to another frame or take it out of them
 - Deleting a spot no longer renumbers the others: delete Spot 2 and the show keeps Spots 1 and 3. The delete box offers "Renumber spots" if you'd rather close the gap, and + Add Spot fills the lowest free number

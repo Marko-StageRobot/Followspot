@@ -1479,6 +1479,261 @@ function buildCharactersHTML({ show, characters, label, showCostumeNotes }) {
 </html>`;
 }
 
+// ---------- Shared pieces for the action key, scene list and cover pages ----------
+
+// Built-in actions in the same order as the cue list's action menu
+const BUILTIN_ACTIONS = ['Pick Up', 'Fade Up', 'Fade Down', 'Fade Out', 'Fade In Place', 'Bump Up', 'Bump Out', 'Swap To', 'Slide To', 'Stay With',
+  'Iris In', 'Iris Out', 'Iris/Fade Up', 'Iris/Fade Down', 'Iris/Fade Out', 'Up & Out', 'Dump & Restore', 'Bump Color', 'Roll Color', 'Ballyhoo', 'Off'];
+
+function imageDataURL(filePath) {
+  if (!filePath) return '';
+  try {
+    const ext = filePath.split('.').pop().toLowerCase();
+    const mime = { png: 'image/png', gif: 'image/gif', svg: 'image/svg+xml', webp: 'image/webp' }[ext] || 'image/jpeg';
+    return `data:${mime};base64,${fs.readFileSync(filePath).toString('base64')}`;
+  } catch (e) { return ''; }
+}
+
+const printDate = () => new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+
+// The show's lighting team (and producer) as [role, name] pairs, filled-in ones only
+function showTeam(show) {
+  return [['Producer', show.producer], ['Lighting Designer', show.designer], ['Associate LD', show.associate_ld], ['Assistant LD', show.assistant_ld],
+    ['Production Electrician', show.production_electrician], ['Programmer', show.programmer]].filter(([, name]) => name);
+}
+
+// Actions used anywhere in the show, in action-menu order, then custom actions
+function actionsUsed(spotCues, customActions) {
+  const used = new Set(spotCues.map(sc => sc.action).filter(a => a && a !== 'Tracked'));
+  const order = [...BUILTIN_ACTIONS, ...(customActions || []).map(a => a.name)];
+  return [...order.filter(a => used.has(a)), ...[...used].filter(a => !order.includes(a))];
+}
+
+// The header used by the action key and scene list (same look as the other one-page sheets)
+const SIMPLE_SHEET_CSS = `
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif; font-size: 11pt; color: #1a1a1a; background: white; }
+  .header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2.5px solid #1a1a1a; }
+  .header-left { flex: 1; }
+  .show-title { font-size: 22pt; font-weight: 800; letter-spacing: -0.5px; line-height: 1; margin-bottom: 4px; }
+  .header-team { font-size: 8.5pt; color: #555; margin-bottom: 2px; }
+  .header-right { text-align: right; flex-shrink: 0; }
+  .print-label { font-size: 14pt; font-weight: 800; color: #1a1a1a; }
+  .print-sub { font-size: 8.5pt; color: #888; margin-top: 2px; }
+  .section-title { font-size: 8pt; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.08em; margin: 4px 0 8px; }
+  .empty { color: #999; font-size: 11pt; padding: 40px 0; text-align: center; }`;
+
+function simpleHeaderHTML(show, label, kindName, sub) {
+  const logo = imageDataURL(show.logo_path);
+  const team = [show.designer ? 'LD: ' + show.designer : '', show.associate_ld ? 'Assoc: ' + show.associate_ld : '', show.assistant_ld ? 'Asst: ' + show.assistant_ld : ''].filter(Boolean).map(escapeText).join(' · ');
+  return `
+  <div class="header">
+    ${logo ? `<img style="width:56px;height:56px;object-fit:contain;border-radius:8px;flex-shrink:0;" src="${logo}" />` : ''}
+    <div class="header-left">
+      <div class="show-title">${escapeText(show.title)}</div>
+      ${team ? `<div class="header-team">${team}</div>` : ''}
+    </div>
+    <div class="header-right">
+      <div class="print-label">${escapeText(label || kindName)}</div>
+      <div class="print-sub">${escapeText(sub)}</div>
+      <div class="print-sub">${printDate()}</div>
+    </div>
+  </div>`;
+}
+
+// ---------- Action key: every action symbol and what it's called ----------
+function buildActionKeyHTML({ show, label, customActions, usedOnly, spotCues }) {
+  const used = new Set(actionsUsed(spotCues, customActions));
+  const builtins = BUILTIN_ACTIONS.filter(a => !usedOnly || used.has(a));
+  const customs = (customActions || []).filter(a => !usedOnly || used.has(a.name));
+  const card = (name, custom) => `
+    <div class="key-card">
+      <div class="key-icon">${getActionIconHTML(name, 40, customActions)}</div>
+      <div class="key-name">${escapeText(name)}${custom ? '<span class="key-custom">Custom</span>' : ''}</div>
+    </div>`;
+  const total = builtins.length + customs.length;
+  return `<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><style>${SIMPLE_SHEET_CSS}
+  .key-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 18px; }
+  .key-card { display: flex; align-items: center; gap: 12px; padding: 9px 12px; border: 1.5px solid #e2e2e2; border-radius: 10px; break-inside: avoid; }
+  .key-icon { width: 40px; height: 40px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+  .key-name { font-size: 11.5pt; font-weight: 700; line-height: 1.2; }
+  .key-custom { display: block; font-size: 7pt; font-weight: 700; color: #999; text-transform: uppercase; letter-spacing: 0.06em; margin-top: 2px; }
+</style></head>
+<body>
+  ${simpleHeaderHTML(show, label, 'Action Key', (usedOnly ? 'Actions in this show' : 'Action symbols') + ' · ' + total)}
+  ${!total ? '<div class="empty">No actions used in this show yet.</div>' : ''}
+  ${builtins.length ? `<div class="section-title">${usedOnly ? 'Actions' : 'Built-in actions'}</div><div class="key-grid">${builtins.map(a => card(a, false)).join('')}</div>` : ''}
+  ${customs.length ? `<div class="section-title">This show's custom actions</div><div class="key-grid">${customs.map(a => card(a.name, true)).join('')}</div>` : ''}
+</body></html>`;
+}
+
+// ---------- Scene list: every scene in order with its song, cues, LQ / T· range and script pages ----------
+function buildSceneListHTML({ show, label, scenes, cues }) {
+  const range = (vals) => {
+    const v = vals.filter(x => x !== null && x !== undefined && String(x).trim() !== '');
+    if (!v.length) return '—';
+    return v[0] === v[v.length - 1] ? escapeText(v[0]) : `${escapeText(v[0])}–${escapeText(v[v.length - 1])}`;
+  };
+  let n = 0;
+  const rows = scenes.map(sc => {
+    const sceneCues = cues.filter(c => c.scene_id === sc.id);
+    if (sc.act_break) {
+      return `<tr class="act"><td></td><td colspan="6">${escapeText(sc.label)}${sc.song ? ` <span class="song">${escapeText(sc.song)}</span>` : ''}${sceneCues.length ? ` <span class="act-cues">${sceneCues.length} cue${sceneCues.length === 1 ? '' : 's'} · LQ ${range(sceneCues.map(c => c.lq_number))}</span>` : ''}</td></tr>`;
+    }
+    n++;
+    return `<tr>
+      <td class="num">${n}</td>
+      <td class="scene">${escapeText(sc.label)}</td>
+      <td class="song">${escapeText(sc.song || '')}</td>
+      <td class="c">${sceneCues.length || '—'}</td>
+      <td class="c">${range(sceneCues.map(c => c.lq_number))}</td>
+      <td class="c">${range(sceneCues.map(c => c.track_number))}</td>
+      <td class="c">${range(sceneCues.map(c => c.page))}</td>
+    </tr>`;
+  }).join('');
+  return `<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><style>${SIMPLE_SHEET_CSS}
+  table { width: 100%; border-collapse: collapse; }
+  thead th { font-size: 7.5pt; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.06em; text-align: left; padding: 0 8px 6px; border-bottom: 1.5px solid #1a1a1a; }
+  thead th.c { text-align: center; }
+  td { padding: 8px; border-bottom: 1px solid #e6e6e6; font-size: 10.5pt; vertical-align: top; }
+  tr { break-inside: avoid; }
+  td.num { width: 30px; color: #999; font-weight: 700; font-size: 9pt; }
+  td.scene { font-weight: 800; }
+  td.song { color: #555; }
+  td.c { text-align: center; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  tr.act td { background: #f6efe2; color: #8a5a00; font-weight: 800; font-size: 9.5pt; text-transform: uppercase; letter-spacing: 0.05em; padding: 6px 8px; border-bottom: none; }
+  tr.act .song { text-transform: none; letter-spacing: 0; font-weight: 600; color: #a87a2a; margin-left: 6px; }
+  tr.act .act-cues { text-transform: none; letter-spacing: 0; font-weight: 500; color: #a87a2a; float: right; }
+</style></head>
+<body>
+  ${simpleHeaderHTML(show, label, 'Scene List', `${n} scene${n === 1 ? '' : 's'} · ${cues.length} cue${cues.length === 1 ? '' : 's'}`)}
+  ${scenes.length ? `<table>
+    <thead><tr><th></th><th>Scene</th><th>Song</th><th class="c">Cues</th><th class="c">LQ</th><th class="c">T·</th><th class="c">Pages</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table>` : '<div class="empty">No scenes yet. Add them on the Scenes screen.</div>'}
+</body></html>`;
+}
+
+// ---------- Cover page for the caller sheet and spot sheets ----------
+// Its own first page, top to bottom: the label and date (small), the show name, the logo, the theatre
+// and producer; each spot (number, operator and position, the fixture in gray) with its color load in
+// one row; a key to the action symbols used in the show; and the lighting team, centered at the very
+// bottom (only the roles that have a name). On a landscape page (caller sheet with 3+ spots) the show name, logo, theatre and producer
+// sit in a left column beside the spots and key. Every class starts with "cv-" so it can't clash with
+// the sheet it's added to. pageHeightIn is the sheet's printable height.
+function coverPageHTML({ show, label, sheetName, spots, colorSlotsBySpot, spotCues, customActions, pageHeightIn, landscape }) {
+  const logo = imageDataURL(show.logo_path);
+  const team = showTeam(show).filter(([role]) => role !== 'Producer');
+  const keyActions = actionsUsed(spotCues, customActions);
+  const single = spots.length === 1;
+  const swatch = (gelNum) => (!gelNum ? '#ececec' : gelColor(gelNum) || '#FFFFFF');
+  const dark = (hex) => { const r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16); return (r * 0.299 + g * 0.587 + b * 0.114) < 140; };
+  // One frame: its color (several gels stack as bands), the frame label and the full gel number
+  const frame = (labelText, gelNumber, perm) => {
+    const nums = (gelNumber || '').split('+').map(x => x.trim()).filter(Boolean);
+    const bands = nums.length ? nums.map(n => swatch(n)) : [swatch('')];
+    const d = nums.length === 1 && dark(bands[0]);
+    // Several gels: each gel's color as its own band, stacked behind the text
+    const bandsHTML = bands.length > 1 ? `<div class="cv-bands">${bands.map(c => `<div style="background:${c};"></div>`).join('')}</div>` : '';
+    return `<div class="cv-frame${perm ? ' cv-perm' : ''}" style="background:${bands[0]};">${bandsHTML}
+      <div class="cv-frame-label" style="color:${d ? 'rgba(255,255,255,0.75)' : 'rgba(0,0,0,0.5)'}">${labelText}</div>
+      <div class="cv-frame-gel" style="color:${d ? '#fff' : '#1a1a1a'}">${nums.length ? nums.map(escapeText).join('+<wbr>') : '—'}</div>
+    </div>`;
+  };
+  // Every spot's frames sit on one shared grid: a column per frame number (and one for PERM), the same
+  // width for every spot, so Frame 1 lines up with Frame 1. A spot missing a frame leaves that space empty.
+  const frameNumbers = [...new Set(spots.flatMap(sp => (colorSlotsBySpot[sp.id] || []).filter(sl => !sl.is_permanent).map(sl => sl.slot_number)))].sort((a, b) => a - b);
+  const permFor = (sp) => (colorSlotsBySpot[sp.id] || []).find(sl => sl.is_permanent && (sl.gel_number || sl.gel_name));
+  const anyPerm = spots.some(permFor);
+  const columns = frameNumbers.length + (anyPerm ? 1 : 0);
+  const spotBlocks = spots.map(spot => {
+    const slots = colorSlotsBySpot[spot.id] || [];
+    const perm = permFor(spot);
+    const cells = frameNumbers.map(n => { const sl = slots.find(x => !x.is_permanent && x.slot_number === n); return sl ? frame('F' + n, sl.gel_number, false) : '<div></div>'; });
+    if (anyPerm) cells.push(perm ? frame('PERM', perm.gel_number, true) : '<div></div>');
+    const title = [`Spot ${spot.spot_number}`, spot.operator_name, spot.location].filter(Boolean).map(escapeText).join(' · ');
+    return `<div class="cv-spot">
+      <div class="cv-spot-title">${title}</div>
+      ${spot.fixture_type ? `<div class="cv-spot-fixture">${escapeText(spot.fixture_type)}</div>` : ''}
+      <div class="cv-frames">${cells.join('')}</div>
+    </div>`;
+  }).join('');
+  const identity = `
+    <div class="cv-title">${escapeText(show.title)}</div>
+    ${logo ? `<div class="cv-logo-box"><img class="cv-logo" src="${logo}" /></div>` : ''}
+    ${show.theatre ? `<div class="cv-theatre">${escapeText(show.theatre)}</div>` : ''}
+    ${show.producer ? `<div class="cv-producer">${escapeText(show.producer)}</div>` : ''}`;
+  const sheetLine = single ? '' : `<div class="cv-sheet-name">${escapeText(sheetName)}</div>`;
+  const key = keyActions.length ? `<div class="cv-key">
+      <div class="cv-section">Action key</div>
+      <div class="cv-key-grid">${keyActions.map(a => `<div class="cv-key-item">${getActionIconHTML(a, 22, customActions)}<span>${escapeText(a)}</span></div>`).join('')}</div>
+    </div>` : '';
+  return `
+<style>
+  .cv-page { height: ${pageHeightIn}in; overflow: hidden; display: flex; flex-direction: column; break-after: page; page-break-after: always;
+    font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif; color: #1a1a1a;
+    border: 2.5px solid #1a1a1a; border-radius: 14px; padding: ${landscape ? '0.22in 0.3in' : '0.3in 0.32in'};
+    /* kept a few pixels inside the printable area so the PDF never trims the border's right edge */
+    width: calc(100% - 6px); margin: 0 auto; }
+  .cv-top { flex: 1 1 auto; min-height: 0; display: flex; ${landscape ? 'flex-direction: row; gap: 0.35in;' : 'flex-direction: column;'} }
+  .cv-identity { display: flex; flex-direction: column; align-items: center; text-align: center; min-height: 0; ${landscape ? 'width: 3.4in; flex-shrink: 0; justify-content: center;' : 'flex: 1 1 auto;'} }
+  .cv-main { display: flex; flex-direction: column; min-width: 0; ${landscape ? 'flex: 1; justify-content: center;' : ''} }
+  .cv-meta { display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 8px; min-height: 22px; }
+  .cv-label { font-size: 10pt; font-weight: 800; color: #fff; background: #1a1a1a; padding: 2px 11px; border-radius: 20px; }
+  .cv-date { font-size: 9pt; color: #888; }
+  .cv-title { font-size: ${landscape ? '30pt' : '38pt'}; font-weight: 800; letter-spacing: -1px; line-height: 1.1;
+    text-decoration: underline; text-decoration-thickness: 3px; text-underline-offset: 7px; }
+  .cv-logo-box { flex: 1 1 auto; min-height: 1.2in; max-height: ${landscape ? '3.4in' : '3.6in'}; width: 100%; display: flex; justify-content: center; margin: 12px 0; }
+  .cv-logo { height: 100%; max-width: 100%; object-fit: contain; }
+  .cv-theatre { font-size: 13pt; font-weight: 600; color: #333; }
+  .cv-producer { font-size: 11pt; color: #666; margin-top: 3px; }
+  .cv-sheet-name { font-size: 16pt; font-weight: 800; text-align: ${landscape ? 'left' : 'center'}; margin: ${landscape ? '0 0 8px' : '16px 0 4px'}; }
+  .cv-spots { display: flex; flex-direction: column; gap: ${single ? '0' : '10px'}; margin-top: ${single && !landscape ? '18px' : '6px'}; }
+  .cv-spot { text-align: ${landscape ? 'left' : 'center'}; }
+  .cv-spot-title { font-size: ${single ? '19pt' : '13pt'}; font-weight: 800; color: #1a1a1a; line-height: 1.15; }
+  .cv-spot-fixture { font-size: ${single ? '12pt' : '10pt'}; color: #888; margin-top: 2px; }
+  .cv-frames { display: grid; grid-template-columns: repeat(${Math.max(columns, 1)}, minmax(0, 1fr)); gap: 5px; margin-top: ${single ? '10px' : '6px'}; }
+  .cv-frame { position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: center; border-radius: 6px; border: 1px solid rgba(0,0,0,0.12); padding: ${single ? '7px 8px' : '4px 6px'}; text-align: center; }
+  .cv-perm { border: 2px solid #C8A26B; }
+  .cv-bands { position: absolute; inset: 0; display: flex; flex-direction: column; }
+  .cv-bands > div { flex: 1; }
+  .cv-frame-label, .cv-frame-gel { position: relative; }
+  .cv-frame-label { font-size: 7pt; font-weight: 700; letter-spacing: 0.04em; }
+  .cv-frame-gel { font-size: ${single ? '12pt' : '9.5pt'}; font-weight: 800; line-height: 1.15; overflow-wrap: normal; }
+  .cv-section { font-size: 7.5pt; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 7px; }
+  .cv-key { margin-top: ${single ? '20px' : '14px'}; }
+  .cv-key-grid { display: grid; grid-template-columns: repeat(${landscape ? 4 : 4}, 1fr); gap: 6px 10px; }
+  .cv-key-item { display: flex; align-items: center; gap: 6px; font-size: 8.5pt; font-weight: 600; min-width: 0; }
+  .cv-key-item svg, .cv-key-item img { flex-shrink: 0; }
+  .cv-team-band { flex-shrink: 0; margin-top: auto; padding-top: 14px; text-align: center; }
+  .cv-team-rule { width: 2.2in; border: none; border-top: 1px solid #c8c8c8; margin: 0 auto 10px; }
+  .cv-team-line { font-size: 11pt; line-height: 1.6; color: #1a1a1a; font-weight: 400; }
+  .cv-team-line .cv-role { color: #8a8a8a; font-weight: 300; }
+</style>
+<div class="cv-page">
+  <div class="cv-meta">${label ? `<span class="cv-label">${escapeText(label)}</span>` : ''}<span class="cv-date">${printDate()}</span></div>
+  <div class="cv-top">
+    <div class="cv-identity">${identity}</div>
+    <div class="cv-main">
+      ${sheetLine}
+      <div class="cv-spots">${spotBlocks}</div>
+      ${key}
+    </div>
+  </div>
+  ${team.length ? `<div class="cv-team-band">
+    <hr class="cv-team-rule" />
+    ${team.map(([role, name]) => `<div class="cv-team-line"><span class="cv-role">${role}:</span> ${escapeText(name)}</div>`).join('')}
+  </div>` : ''}
+</div>`;
+}
+
+// Puts a cover page in front of a sheet's own pages
+function withCoverPage(sheetHTML, coverHTML) {
+  return sheetHTML.replace(/<body([^>]*)>/, (m) => m + coverHTML);
+}
+
 // Page margins per sheet type (the sheets' HTML is laid out for these)
 const PAGE_MARGINS = {
   spot: { top: '0.5in', right: '0.4in', bottom: '0.4in', left: '0.4in' },
@@ -1486,6 +1741,8 @@ const PAGE_MARGINS = {
   color: { top: '0.5in', right: '0.4in', bottom: '0.4in', left: '0.4in' },
   notes: { top: '0.5in', right: '0.5in', bottom: '0.5in', left: '0.5in' },
   characters: { top: '0.5in', right: '0.4in', bottom: '0.4in', left: '0.4in' },
+  actions: { top: '0.5in', right: '0.5in', bottom: '0.5in', left: '0.5in' },
+  scenes: { top: '0.5in', right: '0.5in', bottom: '0.5in', left: '0.5in' },
 };
 
 // One headless Chrome is kept running between renders so live print previews stay fast
@@ -1541,4 +1798,4 @@ function countPages(pdf) {
   return (Buffer.from(pdf).toString('latin1').match(/\/Type\s*\/Page[^s]/g) || []).length;
 }
 
-module.exports = { buildSpotSheetHTML, buildCallerSheetHTML, buildColorLoadHTML, buildSpotNotesHTML, buildCharactersHTML, renderPDF, renderPDFBuffer, countPages, closeBrowser, PAGE_MARGINS };
+module.exports = { buildSpotSheetHTML, buildCallerSheetHTML, buildColorLoadHTML, buildSpotNotesHTML, buildCharactersHTML, buildActionKeyHTML, buildSceneListHTML, coverPageHTML, withCoverPage, renderPDF, renderPDFBuffer, countPages, closeBrowser, PAGE_MARGINS };

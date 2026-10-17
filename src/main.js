@@ -3,7 +3,7 @@ const path = require('node:path');
 const Database = require('better-sqlite3');
 const { exportShow, importShow } = require('./showFile');
 const ipadSync = require('./ipadSync');
-const { buildSpotSheetHTML, buildCallerSheetHTML, buildColorLoadHTML, buildSpotNotesHTML, buildCharactersHTML, renderPDF, renderPDFBuffer, countPages, closeBrowser, PAGE_MARGINS } = require('./pdfGenerator');
+const { buildSpotSheetHTML, buildCallerSheetHTML, buildColorLoadHTML, buildSpotNotesHTML, buildCharactersHTML, buildActionKeyHTML, buildSceneListHTML, coverPageHTML, withCoverPage, renderPDF, renderPDFBuffer, countPages, closeBrowser, PAGE_MARGINS } = require('./pdfGenerator');
 
 if (require('electron-squirrel-startup')) app.quit();
 
@@ -254,16 +254,27 @@ function buildSheet(kind, opts) {
   const label = opts.label || '';
   const labelPart = label || 'Sheet';
   const landscape = spots.length > 2;
+  // Every action used in the show (for the action key and cover pages)
+  const showSpotCues = () => database.prepare('SELECT sc.* FROM spot_cues sc JOIN cues c ON sc.cue_id = c.id WHERE c.show_id = ?').all(opts.showId);
+  // Optional cover page in front of a spot or caller sheet, sized to the sheet's printable height
+  // (spot sheets always print portrait; the caller sheet turns landscape for 3+ spots)
+  const cover = (html, sheetName, coverSpots, margin, isLandscape) => {
+    if (!opts.cover) return html;
+    const colorSlotsBySpot = {};
+    for (const sp of coverSpots) colorSlotsBySpot[sp.id] = slotsFor(sp.id);
+    const pageHeightIn = (isLandscape ? 8.5 : 11) - parseFloat(margin.top) - parseFloat(margin.bottom) - 0.08;
+    return withCoverPage(html, coverPageHTML({ show, label, sheetName, spots: coverSpots, colorSlotsBySpot, spotCues: showSpotCues(), customActions, pageHeightIn, landscape: isLandscape }));
+  };
 
   if (kind === 'spot') {
     const spot = spots.find(s => s.id === opts.spotId);
     return {
-      html: buildSpotSheetHTML({
+      html: cover(buildSpotSheetHTML({
         cueFields: show.cue_fields, show, spot, colorSlots: slotsFor(spot.id), cues, characters, scenes, label, customActions,
         spotCues: database.prepare('SELECT * FROM spot_cues WHERE spot_id = ?').all(spot.id),
         numSpots: spots.length, hideOff: !!opts.hideOff, hideTracked: !!opts.hideTracked,
         rangeStart: opts.rangeStart ?? null, rangeEnd: opts.rangeEnd ?? null, showTracks: opts.showTracks !== false,
-      }),
+      }), `Spot ${spot.spot_number}${spot.operator_name ? ' · ' + spot.operator_name : ''}`, [spot], PAGE_MARGINS.spot, false),
       landscape, margin: PAGE_MARGINS.spot,
       fileName: `${show.title} - Spot ${spot.spot_number} - ${labelPart}.pdf`,
     };
@@ -275,7 +286,8 @@ function buildSheet(kind, opts) {
       spotCuesBySpot[spot.id] = database.prepare('SELECT * FROM spot_cues WHERE spot_id = ?').all(spot.id);
     }
     return {
-      html: buildCallerSheetHTML({ cueFields: show.cue_fields, show, spots, colorSlotsBySpot, cues, spotCuesBySpot, characters, scenes, label, customActions, showTracks: opts.showTracks !== false }),
+      html: cover(buildCallerSheetHTML({ cueFields: show.cue_fields, show, spots, colorSlotsBySpot, cues, spotCuesBySpot, characters, scenes, label, customActions, showTracks: opts.showTracks !== false }),
+        'Caller Sheet', spots, PAGE_MARGINS.caller, landscape),
       landscape, margin: PAGE_MARGINS.caller,
       fileName: `${show.title} - Caller Sheet - ${labelPart}.pdf`,
     };
@@ -304,6 +316,20 @@ function buildSheet(kind, opts) {
       html: buildCharactersHTML({ show, characters: cast, label, showCostumeNotes: opts.showCostumeNotes !== false }),
       landscape: false, margin: PAGE_MARGINS.characters,
       fileName: `${show.title} - Characters - ${labelPart}.pdf`,
+    };
+  }
+  if (kind === 'actions') {
+    return {
+      html: buildActionKeyHTML({ show, label, customActions, usedOnly: !!opts.usedOnly, spotCues: showSpotCues() }),
+      landscape: false, margin: PAGE_MARGINS.actions,
+      fileName: `${show.title} - Action Key - ${labelPart}.pdf`,
+    };
+  }
+  if (kind === 'scenes') {
+    return {
+      html: buildSceneListHTML({ show, label, scenes, cues }),
+      landscape: false, margin: PAGE_MARGINS.scenes,
+      fileName: `${show.title} - Scene List - ${labelPart}.pdf`,
     };
   }
   throw new Error('Unknown sheet: ' + kind);
