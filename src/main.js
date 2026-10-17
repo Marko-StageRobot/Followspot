@@ -396,7 +396,20 @@ function setupIPC() {
         filters: [{ name: 'SpotPlot Show', extensions: ['spotplot'] }],
       });
       if (!filePath) { event.returnValue = { success: false, cancelled: true }; return; }
-      require('fs').writeFileSync(filePath, JSON.stringify(data, null, 2));
+      // The printed sheets ride along (base64 PDFs), so SpotPlot for iPad has the paperwork for a show
+      // opened from this file. Other Macs ignore them on import. See docs/sync-protocol.md.
+      data.sheets = { spot: {}, caller: null };
+      for (const spot of data.spots) {
+        try {
+          const sheet = buildSheet('spot', { showId, spotId: spot.id, label: '' });
+          data.sheets.spot[spot.id] = (await renderPDFBuffer(sheet.html, sheet)).toString('base64');
+        } catch (e) { console.error('Export: spot sheet failed', e); }
+      }
+      try {
+        const sheet = buildSheet('caller', { showId, label: '' });
+        data.sheets.caller = (await renderPDFBuffer(sheet.html, sheet)).toString('base64');
+      } catch (e) { console.error('Export: caller sheet failed', e); }
+      require('fs').writeFileSync(filePath, JSON.stringify(data));
       event.returnValue = { success: true, path: filePath };
     } catch(e) {
       console.error('Export error:', e);

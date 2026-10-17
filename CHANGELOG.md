@@ -23,6 +23,7 @@ Spots & shows
 - Deleting a spot no longer renumbers the others: delete Spot 2 and the show keeps Spots 1 and 3. The delete box offers "Renumber spots" if you'd rather close the gap, and + Add Spot fills the lowest free number
 
 Other
+- Exported .spotplot files now carry the printed spot sheets and caller sheet, so SpotPlot for iPad has the paperwork for a show opened from a file. Files are a little bigger; other Macs open them as before
 - Help → Send Feedback… starts an email to support with your SpotPlot version, macOS version and Mac type filled in. Help → Contact Support does the same
 
 Fixes

@@ -20,7 +20,7 @@ Working plan for the operator tablet app. Started 2026-10-12. Decisions marked *
 - **Decided: standalone notes stay on that iPad** until a Mac connects again.
 - **Decided: the caller picks which spots to show.**
 - **Decided: Eos first,** grandMA later.
-- **Decided: the iPad app is free and unrestricted.** It can only get shows from a licensed SpotPlot, so the license lives on the Mac (see Licensing).
+- **Decided: the iPad app is free and unrestricted.** It can only get shows from a licensed SpotPlot (by sync or a `.spotplot` file it exported), so the license lives on the Mac (see Licensing).
 
 ## How it fits together
 
@@ -112,7 +112,7 @@ A slim bar pinned at the top of the iPad while following:
 
 - **Decided:** the iPad app is free and has no license checks of its own. The only way an iPad gets a show is by syncing from SpotPlot on a Mac, and SpotPlot only runs with a valid license, so the license is enforced on the Mac.
 - The iPad **never locks itself**, connected or not. If the Mac's license expires, SpotPlot on the Mac stops at its license screen and simply can't send new shows or updates; shows already on the iPads keep working.
-- The iPad has no way to open show files on its own (no AirDrop or Files import), so this stays true.
+- **Decided (2026-10-17): the iPad can open `.spotplot` files** (AirDrop, Mail, Files), for theatres where sync isn't set up. This still keeps the license on the Mac: a `.spotplot` file can only be made by a licensed SpotPlot. A file-opened show links up with its Mac if that Mac pairs later.
 - Knock-on: the Production plan's device count (spots × 2 + 2) assumed operators count as devices. With free iPads it only needs to cover the design team's Macs. Revisit before that plan launches.
 
 ## Technology
@@ -124,11 +124,33 @@ A slim bar pinned at the top of the iPad while following:
 
 ## Phases
 
-1. **Connect and view:** desktop announces and pairs; the iPad downloads a show, picks a role, shows the cue list and PDFs, and works standalone. The desktop lists connected iPads.
+1. **Connect and view** (built 2026-10-17, in `~/Desktop/spotplot-ipad`; still to check landscape and a real iPad): desktop announces and pairs; the iPad downloads a show, picks a role, shows the cue list and PDFs, and works standalone. The desktop lists connected iPads.
 2. **Suggestions:** When/Notes editing on the iPad, the offline queue, and the desktop review list.
 3. **Live sync:** desktop edits reach connected iPads instantly; versioned catch-up after reconnecting.
 4. **Follow console:** Eos listening on the iPad, the Now / Next bar, live and up-next highlights, scroll-to-pause.
 5. **Polish:** onboarding, TestFlight beta, then the App Store.
+
+## Phase 1 design (decided 2026-10-17)
+
+The look: an Apple app, not a generic one. Native SwiftUI controls, SF Pro, SF Symbols, the system's dark materials, standard navigation and sheets. Nothing custom where Apple has a control for it. Colors and sizes follow `DESIGN.md`.
+
+- **Devices:** iPad only. iPadOS 26 and newer. Both orientations.
+- **Appearance:** always dark.
+- **Layout:** full screen, one show at a time. A top bar with the show and role as the title ("The Lighthouse · Spot 1"); tap it to change show or role. Changing role asks to confirm ("Switch to Spot 2?") so a bumped iPad doesn't change role mid-show. The iPad remembers its show and role.
+- **Two views:** Cue List and Paperwork, switched with a segmented control. Opens to whichever the operator used last.
+- **Cue list:** large type, dark. Which details show (action, character, intensity, iris, color, time, When, Notes) defaults to the Mac's Cue Settings → Show on print, and each operator can turn details on or off on their iPad. Off cues show as slim, dimmed rows (a switch hides them). Color shows the frame number only ("F2"), with the yellow color-change highlight from the printed sheets. Scene headers and T· numbers match the paperwork.
+- **Caller role:** side by side like the caller sheet, a column for each spot the caller chose.
+- **Color load:** this spot's frames in one row at the top of the cue list (like the Mac's header color load); tap to show or hide, remembered.
+- **Text size:** pinch, or a text-size control; remembered per iPad.
+- **Screen:** stays awake while a show is open.
+- **First launch:** one short welcome screen with a Find Your Mac button, then the list of Macs nearby and the pairing code.
+- **Updates (until live sync):** the iPad checks for changes automatically whenever the Mac is reachable (on open and every so often) and on pull-to-refresh, but never changes the show without asking: a banner at the top ("Updates from Maya's MacBook · 4 cues changed  [See changes] [Update]") that never covers the cue list. The operator taps Update when ready.
+- **Changes view:** every update, newest first, with its date and what changed in this role's cues (e.g. "LQ 14: Fade Out → Bump Out"). Also shows what an update would change before accepting it.
+- **Opening `.spotplot` files:** tap a file in AirDrop, Mail or Files to open it as a show. Opening a newer file of a show already on the iPad works like an update (banner, changes, confirm).
+- **Paperwork for file-opened shows:** the Mac's `.spotplot` export also carries each spot sheet and the caller sheet as PDFs, so the iPad has the exact paperwork without a connection.
+- **Name and icon:** "SpotPlot", the same icon as the Mac app ("SpotPlot for iPad" on the App Store).
+- **Code:** `~/Desktop/spotplot-ipad`, its own private GitHub repo `spotplot-ipad`.
+- **Testing:** the iPad simulator on the Mac for now (it reaches the Mac's sync server at localhost); real iPads later.
 
 ## Decided details
 
