@@ -26,6 +26,7 @@ Spots & shows
 iPad
 - iPad Sync is now per show: each show has its own "Let iPads connect to this show" switch and its own code, in that show's Show Settings → iPad Sync. An iPad that enters a show's code gets that show only, never the other shows on the Mac. Turning a show's switch off hides it from iPads. iPads paired before this change need to enter the show's code once
 - If SpotPlot crashed while iPad Sync was on, iPads could see the Mac twice; that's cleared the next time iPad Sync starts
+- The show dashboard's iPad Sync button shows one green dot for each iPad connected to the show (3 iPads, 3 dots); with more than 6 it shows the number
 - SpotPlot for iPad: Hide Off and Hide Tracked switches (tracked cues hidden by default), a T· Numbers switch, a color load button like the Mac's, intensity stacked over iris, bigger action symbols, and color frames that never wrap ("F1+2" on one line)
 - SpotPlot for iPad: the Caller view now looks like the printed caller sheet, with each spot's color load lined up over its column. A strong line separates cues and a short faint one separates spots, so each cue reads as one row, and every spot's When box in a cue starts at the same height
 - SpotPlot for iPad: highlighted cues stand out more (a tinted row with a solid bar on its left edge), and rows alternate shades so they're easier to tell apart
