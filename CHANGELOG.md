@@ -16,6 +16,7 @@ Cue list
 - Each cue can note its script page: click the small "pg" next to T· and type it (like 13 or 13a)
 
 Printing
+- On spot sheets and the caller sheet, a cue where a spot has no action (it carries on, like a cue you inserted and didn't change for that spot) prints all in grey, without an action, so the eye goes to the cues that need it
 - New: **Action key**, one page showing every action symbol and its name, including your show's custom actions. "Only this show's actions" leaves out the ones no cue uses
 - New: **Scene list**, every scene in order with its song, number of cues, LQ and T· range and script pages, with act breaks marked
 - Two or more color frames now print as **F1+2** (not F1+F2) on spot sheets and the caller sheet, and the same on the iPad
@@ -26,6 +27,7 @@ Spots & shows
 - Deleting a spot no longer renumbers the others: delete Spot 2 and the show keeps Spots 1 and 3. The delete box offers "Renumber spots" if you'd rather close the gap, and + Add Spot fills the lowest free number
 
 iPad
+- SpotPlot for iPad: a cue where a spot carries on never shows the word "Tracked"; it reads like any untouched cue (and Hide Tracked hides it)
 - iPad Sync is now per show: each show has its own "Let iPads connect to this show" switch and its own code, in that show's Show Settings → iPad Sync. An iPad that enters a show's code gets that show only, never the other shows on the Mac. Turning a show's switch off hides it from iPads. iPads paired before this change need to enter the show's code once
 - If SpotPlot crashed while iPad Sync was on, iPads could see the Mac twice; that's cleared the next time iPad Sync starts
 - The show dashboard's iPad Sync button shows one green dot for each iPad connected to the show (3 iPads, 3 dots); with more than 6 it shows the number

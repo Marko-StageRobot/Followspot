@@ -241,7 +241,8 @@ function buildShowData(loaded, choices, gelName) {
       let action = rawAction ? actionFor(rawAction) : '';
       // No action: the spot carries on (Tracked) if it was on, unless the file says OFF
       if (!action) action = (st.on && !/^off$/i.test(field(r, `S${s}Intensity`))) ? 'Tracked' : 'Off';
-      const sc = { id: spotCues.length + 1, cue_id: cueId, spot_id: s, action };
+      // Carrying on is stored as no action, like a cue someone inserted and didn't change for this spot
+      const sc = { id: spotCues.length + 1, cue_id: cueId, spot_id: s, action: action === 'Tracked' ? '' : action };
       if (action !== 'Off') {
         Object.assign(sc, {
           character_id: charIdByName[character.toLowerCase()] || null,

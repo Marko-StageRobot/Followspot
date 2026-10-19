@@ -78,6 +78,11 @@ function framesText(activeFrames) {
   return frames.map((f, i) => i > 0 && /^F\d+$/.test(f) ? f.slice(1) : f).join('+');
 }
 
+// A spot with no action in a cue (or "Tracked", which means the same: it carries on as it was)
+// prints without an action word, in grey, so readers' eyes skip to the cues that need them
+const QUIET_GREY = '#8a8a8a';
+const isQuiet = (sc) => !!sc && sc.action !== 'Off' && (!sc.action || sc.action === 'Tracked');
+
 function colorChangeCues(orderedCues, spotCuesForSpot) {
   const changed = new Set();
   let last = null;
@@ -143,7 +148,7 @@ const sceneOrderMap = {};
   if (hideTracked) {
     sortedCues = sortedCues.filter(c => {
       const sc = spotCues.find(sc => sc.cue_id === c.id && sc.spot_id === spot.id);
-      return sc && sc.action && sc.action !== '';
+      return sc && !isQuiet(sc);
     });
   }
 
@@ -185,6 +190,7 @@ const sceneOrderMap = {};
     const char = charMap[sc.character_id];
     const activeFrames = framesText(sc.active_frames);
     const isOff = sc.action === 'Off';
+    const quiet = isQuiet(sc);
 
     const isIgnored = sc.ignored === 1;
     const highlight = sc.highlight;
@@ -194,14 +200,14 @@ const sceneOrderMap = {};
     if (highlight === 'red') rowStyle = 'background: rgba(200,60,60,0.15);';
 
         rowsHTML += `
-      <tr class="${isOff ? 'off-row' : ''}" style="${rowStyle}">
+      <tr class="${isOff ? 'off-row' : quiet ? 'quiet-row' : ''}" style="${rowStyle}">
         <td class="lq-cell">${cue.lq_number || '—'}${trackHTML(cue, showTracks)}</td>
         ${isIgnored ? `
           <td colspan="7" style="position:relative;padding:0;">
             <table style="width:100%;opacity:0.2;">
               <tr>
                 <td class="action-cell">
-                  ${sc.action ? `<div class="action-inner">${getActionIconHTML(sc.action, 34, customActions)}<span class="action-name">${sc.action}</span></div>` : ''}
+                  ${sc.action && !quiet ? `<div class="action-inner">${getActionIconHTML(sc.action, 34, customActions)}<span class="action-name">${sc.action}</span></div>` : ''}
                 </td>
                 <td class="char-cell">${char ? char.name : sc.custom_character ? sc.custom_character : ''}</td>
                 <td class="int-iris-cell">
@@ -220,7 +226,7 @@ const sceneOrderMap = {};
           <td colspan="7" style="text-align:center;vertical-align:middle;padding:8px;font-size:11pt;font-weight:600;color:#aaa;">Off</td>
         ` : `
         <td class="action-cell">
-          ${sc.action ? `
+          ${sc.action && !quiet ? `
             <div class="action-inner">
               ${getActionIconHTML(sc.action, 34, customActions)}
               <span class="action-name">${sc.action}</span>
@@ -259,6 +265,9 @@ const sceneOrderMap = {};
     color: #1a1a1a;
     background: white;
   }
+  /* No action / tracked: everything in it grey (see isQuiet) */
+  .quiet-row td, .quiet-row td *, .quiet-cell, .quiet-cell * { color: ${QUIET_GREY} !important; }
+
 
   .header {
     display: flex;
@@ -692,13 +701,14 @@ function buildCallerSheetHTML({ cueFields, show, spots, colorSlotsBySpot, cues, 
         if (highlight === 'red') cellStyle = 'background:rgba(200,60,60,0.15);';
         if (isIgnored) cellStyle = 'background:rgba(220,220,220,0.3);';
 
+        const quiet = isQuiet(sc);
         spotCellsHTML += `
-          <td class="spot-cell" style="${cellStyle}position:relative;">
+          <td class="spot-cell${quiet ? ' quiet-cell' : ''}" style="${cellStyle}position:relative;">
             ${isIgnored ? `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:14pt;font-weight:900;color:#1a1a1a;letter-spacing:0.2em;z-index:2;">— IGNORE —</div>` : ''}
             <div style="${isIgnored ? 'opacity:0.2;' : ''}">
               <div class="action-inner" style="margin-bottom:0;align-items:center;">
-                ${getActionIconHTML(sc.action, 30, customActions)}
-                <span class="action-name">${sc.action || '—'}</span>
+                ${quiet ? '' : getActionIconHTML(sc.action, 30, customActions)}
+                <span class="action-name">${quiet ? '—' : (sc.action || '—')}</span>
                 <span class="char-name" style="margin-left:4px;">${char ? char.name : sc.custom_character ? sc.custom_character : '—'}</span>
                 <div class="intensity-badge" style="margin-left:auto;">${sc.intensity ? `<span style="font-size:11pt;font-weight:400;color:#666;">@</span>${sc.intensity}` : ''}</div>
               </div>
@@ -757,6 +767,9 @@ function buildCallerSheetHTML({ cueFields, show, spots, colorSlotsBySpot, cues, 
     color: #1a1a1a;
     background: white;
   }
+  /* No action / tracked: everything in it grey (see isQuiet) */
+  .quiet-row td, .quiet-row td *, .quiet-cell, .quiet-cell * { color: ${QUIET_GREY} !important; }
+
 
   .header {
     display: flex;
