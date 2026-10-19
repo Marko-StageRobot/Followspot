@@ -78,7 +78,7 @@ Plan: `docs/admin-dashboard-plan.md`.
 - [ ] Keep the 2-Mac limit unadvertised: the website and marketing never mention how many Macs a license covers (Wheeler, 2026-10-16). The app still enforces it; the "License in use on 2 Macs" screen is the only place it shows
 
 ## Marketing
-- [ ] Promo video (`~/Desktop/spotplot-video`): **parked until about mid-November**, while the product gets finished. A rough first cut exists (silent, 16:9); expect to rework it once the app and iPad app are closer to launch (see its README)
+- [ ] Promo video (`~/Dropbox (Personal)/1. Professional Projects/1. Active/SpotPlot/spotplot-video`): **parked until about mid-November**, while the product gets finished. A rough first cut exists (silent, 16:9); expect to rework it once the app and iPad app are closer to launch (see its README)
 
 ## Future
 - [ ] SpotPlot Live Sync over the cloud (beyond the local-network iPad app)

@@ -1,6 +1,6 @@
 # License server and admin dashboard: plan
 
-For `~/Desktop/spotplot-server` (repo `wheeler-moon/spotplot-server`, private; pushing `main` deploys to Render). Started 2026-10-13. Nothing here is built yet.
+For `~/Developer/SpotPlot/spotplot-server` (repo `wheeler-moon/spotplot-server`, private; pushing `main` deploys to Render). Started 2026-10-13. Nothing here is built yet.
 
 ## Where it is today
 

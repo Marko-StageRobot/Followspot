@@ -124,7 +124,7 @@ A slim bar pinned at the top of the iPad while following:
 
 ## Phases
 
-1. **Connect and view** (built 2026-10-17, in `~/Desktop/spotplot-ipad`; still to check landscape and a real iPad): desktop announces and pairs; the iPad downloads a show, picks a role, shows the cue list and PDFs, and works standalone. The desktop lists connected iPads.
+1. **Connect and view** (built 2026-10-17, in `~/Developer/SpotPlot/spotplot-ipad`; still to check landscape and a real iPad): desktop announces and pairs; the iPad downloads a show, picks a role, shows the cue list and PDFs, and works standalone. The desktop lists connected iPads.
 2. **Suggestions:** When/Notes editing on the iPad, the offline queue, and the desktop review list.
 3. **Live sync:** desktop edits reach connected iPads instantly; versioned catch-up after reconnecting.
 4. **Follow console:** Eos listening on the iPad, the Now / Next bar, live and up-next highlights, scroll-to-pause.
@@ -149,7 +149,7 @@ The look: an Apple app, not a generic one. Native SwiftUI controls, SF Pro, SF S
 - **Opening `.spotplot` files:** tap a file in AirDrop, Mail or Files to open it as a show. Opening a newer file of a show already on the iPad works like an update (banner, changes, confirm).
 - **Paperwork for file-opened shows:** the Mac's `.spotplot` export also carries each spot sheet and the caller sheet as PDFs, so the iPad has the exact paperwork without a connection.
 - **Name and icon:** "SpotPlot", the same icon as the Mac app ("SpotPlot for iPad" on the App Store).
-- **Code:** `~/Desktop/spotplot-ipad`, its own private GitHub repo `spotplot-ipad`.
+- **Code:** `~/Developer/SpotPlot/spotplot-ipad`, its own private GitHub repo `spotplot-ipad`.
 - **Testing:** the iPad simulator on the Mac for now (it reaches the Mac's sync server at localhost); real iPads later.
 
 ## Decided details
