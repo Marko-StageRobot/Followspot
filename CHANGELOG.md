@@ -9,6 +9,7 @@ Sections: Cue list · Printing · Spots & shows · iPad · Fixes · Other. Websi
 New: **Import from FileMaker.** Bring followspot shows over from a FileMaker database (the FileMaker followspot paperwork many designers use), without needing FileMaker: Home → Import ▾ → FileMaker Show…, or File → Import from FileMaker…. Choose the show's FS_Track.fmp12 (SceneList.fmp12 next to it comes too). The show's details, team, spots and gels, characters, scenes and every cue come across; actions or iris sizes in the file that aren't exactly SpotPlot's are matched by you, or kept as custom ones.
 
 Cue list
+- A spot's lit color frames show bright blue in the cue where its color changes and muted when they're the same as its cue before, so color changes stand out. On spot sheets and the caller sheet, a color that's the same as the spot's cue before now prints grey; changes stay highlighted in yellow
 - Right-click a spot's box in a cue for a real Mac menu: **Copy Cue** and **Paste Cue** (or Paste Cue Without Character) to copy what a spot does into another spot or cue, a **Highlight** submenu (whole cue, When line, Notes line), **Ignore Cue**, **Add Spot Note…**, **Insert Cue Above / Below**, **Delete** the cue, and **Clear Cue**, which empties the box so you can start that cue from scratch (a spot that's Off stays Off). ⌘Z undoes paste, highlight, ignore and clear
 - Click the little color button next to a spot's name at the top of the cue list to keep that spot's whole color load in view (frames and permanent color). It stays open until you close it, even after leaving the cue list
 - Double-clicking a word in When or Notes selects that word, like any text box. Double-click anywhere else in a spot's box to open its options
@@ -27,6 +28,9 @@ Spots & shows
 - Deleting a spot no longer renumbers the others: delete Spot 2 and the show keeps Spots 1 and 3. The delete box offers "Renumber spots" if you'd rather close the gap, and + Add Spot fills the lowest free number
 
 iPad
+- SpotPlot for iPad: Jump to Scene (the list button in the top bar) scrolls straight to any scene, like the Mac's Jump to
+- SpotPlot for iPad: Action Words and Action Symbols are separate switches in the ⋯ menu, for operators who want only symbols or only words
+- SpotPlot for iPad: a color that's the same as the cue before shows in grey; changes stay highlighted in yellow
 - SpotPlot for iPad: a cue where a spot carries on never shows the word "Tracked"; it reads like any untouched cue (and Hide Tracked hides it)
 - iPad Sync is now per show: each show has its own "Let iPads connect to this show" switch and its own code, in that show's Show Settings → iPad Sync. An iPad that enters a show's code gets that show only, never the other shows on the Mac. Turning a show's switch off hides it from iPads. iPads paired before this change need to enter the show's code once
 - If SpotPlot crashed while iPad Sync was on, iPads could see the Mac twice; that's cleared the next time iPad Sync starts

@@ -157,7 +157,7 @@ const COPY_FIELDS = ['action', 'character_id', 'custom_character', 'frame_size',
   'description', 'with_lq', 'notes', 'no_color', 'highlight', 'when_highlight', 'notes_highlight'];
 let cueClipboard = null;
 
-function SpotCueCell({ onDragEnd, onContextMenu, spotCue, spot, cue, fieldsShown = {}, characters, colorSlots, onUpdate, onNewCustomCharacter, lqNumber, onDragStart, onDragOver, onDragLeave, onDrop, isDragTarget, isMenuTarget, onDoubleClick, irisSizes, customActions }) {
+function SpotCueCell({ onDragEnd, onContextMenu, spotCue, spot, cue, fieldsShown = {}, characters, colorSlots, onUpdate, onNewCustomCharacter, lqNumber, onDragStart, onDragOver, onDragLeave, onDrop, isDragTarget, isMenuTarget, colorSame, onDoubleClick, irisSizes, customActions }) {
   const [showActionPicker, setShowActionPicker] = useState(false);
   const [hoveredFrame, setHoveredFrame] = useState(null);
   const [showCustomTime, setShowCustomTime] = useState(false);
@@ -401,7 +401,7 @@ const actionDef = ACTIONS.find(a => a.name === spotCue?.action) || (customAction
                 onUpdate(spotCue.id, 'no_color', isNC ? 0 : 1);
                 if (!isNC) onUpdate(spotCue.id, 'active_frames', '');
               }}
-              style={{ padding: '2px 6px', borderRadius: '6px', fontSize: '11px', fontWeight: '600', cursor: 'pointer', background: spotCue.no_color ? '#AC8E68' : '#2A2A2A', color: spotCue.no_color ? '#FFFFFF' : 'rgba(255,255,255,0.45)', border: `1px solid ${spotCue.no_color ? '#AC8E68' : 'rgba(255,255,255,0.1)'}` }}>
+              style={{ padding: '2px 6px', borderRadius: '6px', fontSize: '11px', fontWeight: '600', cursor: 'pointer', background: spotCue.no_color ? (colorSame ? 'rgba(172,142,104,0.4)' : '#AC8E68') : '#2A2A2A', color: spotCue.no_color ? (colorSame ? 'rgba(255,255,255,0.6)' : '#FFFFFF') : 'rgba(255,255,255,0.45)', border: `1px solid ${spotCue.no_color ? (colorSame ? 'transparent' : '#AC8E68') : 'rgba(255,255,255,0.1)'}` }}>
               NC
             </div>
             {colorSlots.map(slot => {
@@ -413,7 +413,7 @@ const actionDef = ACTIONS.find(a => a.name === spotCue?.action) || (customAction
                     onClick={() => toggleFrame('F' + slot.slot_number)}
                     onMouseEnter={() => setHoveredFrame(slot.id)}
                     onMouseLeave={() => setHoveredFrame(null)}
-                    style={{ padding: '2px 6px', borderRadius: '6px', fontSize: '11px', fontWeight: '600', cursor: 'pointer', background: isActive ? '#0A84FF' : '#2A2A2A', color: isActive ? '#FFFFFF' : 'rgba(255,255,255,0.45)', border: `1px solid ${isActive ? '#0A84FF' : 'rgba(255,255,255,0.1)'}` }}>
+                    style={{ padding: '2px 6px', borderRadius: '6px', fontSize: '11px', fontWeight: '600', cursor: 'pointer', background: isActive ? (colorSame ? 'rgba(10,132,255,0.35)' : '#0A84FF') : '#2A2A2A', color: isActive ? (colorSame ? 'rgba(255,255,255,0.6)' : '#FFFFFF') : 'rgba(255,255,255,0.45)', border: `1px solid ${isActive ? (colorSame ? 'transparent' : '#0A84FF') : 'rgba(255,255,255,0.1)'}` }}>
                     F{slot.slot_number}
                   </div>
                   {isHovered && slot.gel_number && (
@@ -550,7 +550,7 @@ function HeaderColorLoad({ slots, perm }) {
   );
 }
 
-function CueRow({ onDragFinished, onCellMenu, menuCell, cue, isLastCue, fieldsShown, spots, spotCues, characters, colorSlotsBySpot, scenes, onUpdateCue, onUpdateSpotCue, onNewCustomCharacter, onDelete, onInsertAfter, dragSource, dragTarget, setDragSource, setDragTarget, setShowDragModal, onCueDoubleClick, irisSizes, customActions }) {
+function CueRow({ onDragFinished, onCellMenu, menuCell, colorChangesBySpot, cue, isLastCue, fieldsShown, spots, spotCues, characters, colorSlotsBySpot, scenes, onUpdateCue, onUpdateSpotCue, onNewCustomCharacter, onDelete, onInsertAfter, dragSource, dragTarget, setDragSource, setDragTarget, setShowDragModal, onCueDoubleClick, irisSizes, customActions }) {
   const [editingLQ, setEditingLQ] = useState(false);
   const [lqVal, setLqVal] = useState(cue.lq_number || '');
 
@@ -641,6 +641,7 @@ function CueRow({ onDragFinished, onCellMenu, menuCell, cue, isLastCue, fieldsSh
               onContextMenu={(e) => { e.preventDefault(); onCellMenu({ x: e.clientX, y: e.clientY, spotCue: sc, spot, cue }); }}
               isDragTarget={dragTarget?.cue?.id === cue?.id && dragTarget?.spot?.id === spot?.id}
               isMenuTarget={menuCell?.cueId === cue.id && menuCell?.spotId === spot.id}
+              colorSame={!!sc && sc.action !== 'Off' && !!(sc.no_color || sc.active_frames) && !colorChangesBySpot?.[spot.id]?.has(cue.id)}
               irisSizes={irisSizes}
               customActions={customActions}
               onDoubleClick={(e) => {
@@ -876,6 +877,28 @@ export default function CueListScreen({ show, navigate }) {
       setCuePopup(p => ({ ...p, spotCue: { ...p.spotCue, spot_id: p.spot.id, cue_id: p.cue.id, id: result?.id, [field]: value } }));
     }
   };
+
+  // For each spot, the cues where its color changes (its first color counts too), as the prints mark
+  // in yellow. In other cues a lit frame that's the same as before shows muted, so changes stand out.
+  const colorChangesBySpot = React.useMemo(() => {
+    const out = {};
+    const cues = [...(data?.cues || [])].sort((a, b) => a.sort_order - b.sort_order);
+    const byKey = new Map((data?.spotCues || []).map(x => [x.cue_id + ':' + x.spot_id, x]));
+    for (const spot of data?.spots || []) {
+      const changed = new Set();
+      let last = null;
+      for (const cue of cues) {
+        const sc = byKey.get(cue.id + ':' + spot.id);
+        if (!sc || sc.action === 'Off') continue;
+        const color = sc.no_color ? 'NC' : (sc.active_frames || '').split(',').filter(Boolean).sort().join(',');
+        if (!color) continue;
+        if (color !== last) changed.add(cue.id);
+        last = color;
+      }
+      out[spot.id] = changed;
+    }
+    return out;
+  }, [data]);
 
   // Right-click menu on a cue cell: a real macOS menu (main.js 'show-context-menu'). The cell stays
   // outlined while its menu is open; the chosen item comes back as 'context-menu-action'.
@@ -1164,7 +1187,7 @@ const groupedCues = () => {
                       isLastCue={groupIndex === groups.length - 1 && cueIndex === group.cues.length - 1}
                       spots={data?.spots || []}
                       spotCues={data?.spotCues || []} characters={characters}
-                      colorSlotsBySpot={colorSlotsBySpot} scenes={data?.scenes || []}
+                      colorSlotsBySpot={colorSlotsBySpot} scenes={data?.scenes || []} colorChangesBySpot={colorChangesBySpot}
                       onUpdateCue={updateCue} onUpdateSpotCue={updateSpotCue} onNewCustomCharacter={addCustomCharacterToShow}
                       onDelete={deleteCue} onInsertAfter={insertCueAfter}
                       dragSource={dragSource} dragTarget={dragTarget}

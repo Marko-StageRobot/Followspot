@@ -130,6 +130,9 @@ Use one to pick between 2–5 options, like highlight: None / Yellow / Red. Regu
 ### Removable items in a grid (color frames)
 Each item shows a small remove button on hover only: a 16px circle at its top-right, red `×` on a red tint (`rgba(255,69,58,0.16)`). The add tile takes the next grid spot instead of a new row: dashed 1px `rgba(255,255,255,0.2)` border, radius 8, accent-blue "+ Add …" label. Hide it when the grid is full.
 
+### Color frames in the cue list
+A lit frame button (F1…) is accent blue in the cue where that spot's color changes (its first color counts as a change) and muted, accent at 35% with 60% white text and no border, when it's the same as the spot's cue before. NC follows the same rule in its brown. The iPad shows an unchanged color in Label 2 grey and prints use grey #8a8a8a; prints and the iPad mark changes in yellow.
+
 ### Gel chips
 A compact way to show a spot's frames in one row: the chips share the row's width (never wrapping), each taking the room its gel number needs, each with a 5px color strip on top (the gel's color; several gels sit side by side; empty is a dashed outline), the frame label below (F1…, Bold 9, Label 3) and the gel number (Medium 11), cut short with "…" if the row is narrow. Fill 3 background, radius 5, 3px apart. The permanent frame gets a gold outline and a gold "PERM" label. Hover shows the full gel. Used in the cue list header's color load.
 

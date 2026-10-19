@@ -238,7 +238,7 @@ const sceneOrderMap = {};
           <div class="int-val" style="font-size:11pt;font-weight:700;color:#1a1a1a;">${sc.intensity || '—'}</div>
           <div class="iris-val" style="font-size:10pt;color:#333;">${sc.frame_size || '—'}</div>
         </td>
-        <td class="frames-cell"${colorChanged.has(cue.id) ? ` style="background:${COLOR_CHANGE_BG}"` : ''}>${sc.no_color ? 'NC' : (activeFrames || '—')}</td>
+        <td class="frames-cell" style="${colorChanged.has(cue.id) ? `background:${COLOR_CHANGE_BG}` : `color:${QUIET_GREY}`}">${sc.no_color ? 'NC' : (activeFrames || '—')}</td>
         <td class="time-cell">${sc.fade_time ? sc.fade_time + 's' : '—'}</td>
         <td class="when-cell" style="${lineHighlightCSS(sc.when_highlight)}">${whenText(sc, cue)}</td>
         <td class="notes-cell" style="${lineHighlightCSS(sc.notes_highlight)}">${safeRich(sc.notes)}</td>
@@ -715,7 +715,8 @@ function buildCallerSheetHTML({ cueFields, show, spots, colorSlotsBySpot, cues, 
               ${(() => {
                 // Iris / color / time in one labeled strip; fields hidden on print are left out entirely
                 const colorText = sc.no_color ? 'NC' : activeFrames;
-                const colorHL = colorChangedBySpot[spot.id].has(cue.id) ? `background:${COLOR_CHANGE_BG};` : '';
+                // A change is highlighted yellow; the same color as before prints grey
+                const colorHL = colorChangedBySpot[spot.id].has(cue.id) ? `background:${COLOR_CHANGE_BG};` : `color:${QUIET_GREY};`;
                 const items = [
                   printFields.iris.print && sc.frame_size ? `<span class="detail-badge iris"><span class="lbl">Iris</span>${sc.frame_size}</span>` : '',
                   printFields.color.print && colorText ? `<span class="detail-badge color" style="${colorHL}"><span class="lbl">Color</span>${colorText}</span>` : '',
