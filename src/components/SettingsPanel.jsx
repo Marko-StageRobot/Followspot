@@ -232,6 +232,8 @@ export default function SettingsPanel({ onClose }) {
           <Group title="About">
             <Row label="Version"><Value>{version}{/^0\./.test(version) ? ' (Beta)' : ''}</Value></Row>
             <LinkRow label="What’s New in This Version" onClick={() => setShowWhatsNew(true)} />
+            <LinkRow label="Terms of Service" external onClick={() => shell.openExternal('https://spotplotapp.com/terms.html')} />
+            <LinkRow label="Privacy Policy" external onClick={() => shell.openExternal('https://spotplotapp.com/privacy.html')} />
           </Group>
 
           <div style={{ fontSize: '11px', color: C.label3, textAlign: 'center', marginTop: '8px' }}>© {new Date().getFullYear()} The Wheeler Moon Group</div>

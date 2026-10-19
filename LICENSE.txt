@@ -1,6 +1,6 @@
 SPOTPLOT SOFTWARE END USER LICENSE AGREEMENT
 
-Last Updated: August 31, 2026
+Last Updated: October 19, 2026
 
 IMPORTANT — PLEASE READ THIS END USER LICENSE AGREEMENT ("AGREEMENT") CAREFULLY 
 BEFORE INSTALLING OR USING SPOTPLOT. BY INSTALLING, COPYING, OR OTHERWISE USING 
@@ -27,9 +27,12 @@ are granted except as expressly set forth herein.
 
 2. SUBSCRIPTION AND PAYMENT
 
-2.1 Subscription Plans. Access to the Software requires an active, paid subscription. 
-The Company offers monthly and annual subscription plans at rates published on the 
-Company's website, which may be updated from time to time.
+2.1 Subscription Plans. Access to the Software requires an active, paid subscription, 
+or a license the Company provides at no charge (for example, for beta testing), which 
+the Company may end with notice. The Company offers monthly and annual subscription 
+plans at rates published on the Company's website, which may be updated from time to 
+time. Purchases and subscriptions are also governed by the Company's Terms of Service, 
+available at spotplotapp.com/terms.html.
 
 2.2 Automatic Renewal. Subscriptions automatically renew at the end of each 
 subscription period unless cancelled prior to the renewal date. By subscribing, 
@@ -117,8 +120,8 @@ subscription status. The Company does not collect, store, or sell your personal
 production data.
 
 5.4 Privacy Policy. Your use of the Software is also governed by the Company's 
-Privacy Policy, available at wheelermoon.com/privacy, which is incorporated herein 
-by reference.
+Privacy Policy, available at spotplotapp.com/privacy.html, which is incorporated 
+herein by reference.
 
 ────────────────────────────────────────────────────────────────────────────────
 

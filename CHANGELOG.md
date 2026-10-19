@@ -34,6 +34,7 @@ iPad
 Other
 - Settings (home screen) is reorganized like a Mac's System Settings. **Account** shows your email, plan, status (renewal date or any payment problem, once subscriptions start) and your license key, hidden except the last part, with a Copy button. **Deactivate…** takes this Mac off your license so you can move SpotPlot to another Mac. **Updates** has a switch for automatic checks, a Check Now button and when it last checked; SpotPlot also re-checks every few hours while open. **Help & Feedback** and **About** round it out; **What's New** opens by itself the first time SpotPlot starts after an update, showing what changed in that version (it's built into the app, so no internet needed), and any time from Settings → About
 - Settings opens even when there are no shows yet
+- Settings → About links to the new Terms of Service and Privacy Policy on spotplotapp.com. The website's pages are now all served from spotplotapp.com itself (no Google Fonts)
 - Exported .spotplot files now carry the printed spot sheets and caller sheet, so SpotPlot for iPad has the paperwork for a show opened from a file. Files are a little bigger; other Macs open them as before
 - Help → Send Feedback… starts an email to support with your SpotPlot version, macOS version and Mac type filled in. Help → Contact Support does the same
 
