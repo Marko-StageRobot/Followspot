@@ -141,6 +141,9 @@ A highlighted cue gets its color at 24% across the row plus a solid 5pt bar on i
 
 Several color frames are written **F1+2** (the F once, frames in number order), on prints and on the iPad.
 
+### Settings-style grouped rows
+For settings and account screens, like macOS System Settings: a group title (Body 13, semibold, Label 1) above a rounded group (Fill 3, radius 10) of rows separated by hairlines (Separator, inset 12px). Each row is at least 36px: label on the left (Body 13, optional Subheadline 11 hint in Label 2 below), value (Label 2) or a control (Regular 24px button, switch) on the right. Rows that are links show `›` (opens something in the app) or `↗` (leaves the app) in Label 3 and turn accent text on hover. A short footer (Subheadline 11, Label 2) can sit under a group. Example: `src/components/SettingsPanel.jsx`.
+
 ### Right-click (context) menus
 Use the **real macOS menu**, not one we draw: send the items to main.js with `ipcRenderer.send('show-context-menu', items)` (`{ id, label, enabled, checked, submenu }` or `{ type: 'separator' }`); the chosen item comes back as `context-menu-action` with its id, and `context-menu-closed` when it goes away. macOS handles the look, keyboard and dark mode. First line: a disabled item saying what was clicked ("Spot 1 · LQ 20"). Title Case labels, "…" when the item opens a box or asks first, a checkmark for on/off items (Ignore Cue, highlight colors), separators between groups, and a submenu rather than a long list (Highlight ▸). Gray out what can't apply instead of hiding it. While the menu is open, the clicked item gets a 2px accent (`#0A84FF`) outline, like Finder.
 

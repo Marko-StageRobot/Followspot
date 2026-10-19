@@ -23,7 +23,7 @@ Before calling any change finished, go through this list and do what applies:
 5. **Website:** if the change affects how the app works or looks, update the manual or support page in `~/Developer/SpotPlot/spotplot-website` (and its screenshots if they're now wrong). Same for pricing or plan changes.
 6. **Tips:** if a screen's controls changed, check `src/tips.js` still points at real controls with accurate words.
 7. **Design:** new UI follows `DESIGN.md`; a new pattern or color gets added to it.
-8. **Release:** at release time, Unreleased in `CHANGELOG.md` becomes the release notes.
+8. **Release:** at release time, Unreleased in `CHANGELOG.md` becomes the release notes. That section is also built into the app as **What's New** (`src/components/WhatsNew.jsx`), shown once after each update, so write it for users.
 
 ## Commands
 
@@ -41,7 +41,7 @@ There are no tests and no linter (`npm run lint` is a no-op). To verify a change
 - **`src/App.jsx`**: renderer root. Gates on license status, then does screen routing through a `screen` string in state plus `navigate(dest, show)`. There is no router library. Screens live in `src/screens/`, and show-settings sub-panels are in `src/screens/settings/`.
 - **`src/pdfGenerator.js`**: builds each PDF as an HTML string (`build*HTML`) and renders it with Puppeteer (`generate*PDF`). PDF layout changes happen in these HTML/CSS template strings.
 - **`src/ipadSync.js`**: the local-network link to SpotPlot for iPad (plan: `docs/ipad-app-plan.md`). Each show has its own "Let iPads connect to this show" switch and 6-digit code (Show Settings → iPad Sync). While any show's switch is on, it runs a small HTTP server on port 47800 (any free port if that's taken) and announces `_spotplot._tcp` with macOS's `dns-sd`. An iPad that enters a show's code gets a bearer token for **that show only**, for `/api/shows`, `/api/shows/:id` (the `.spotplot` export plus `sync_version`), `/api/shows/:id/pdf?kind=spot|caller` and `/api/presence` (every few seconds; online = seen in the last 15s). Settings and paired iPads live in `userData/ipad-sync.json` under `shows[showId]`, on this Mac, not in any show file. Protocol version 2 (`docs/sync-protocol.md`).
-- **`src/license.js`**: activation/validation against `https://spotplot-server.onrender.com` (a separate server, not in this repo). The result is cached in `localStorage` under `spotplot_license` and trusted for 7 days, and it falls back to the cache when offline. Every check also sends an anonymous per-Mac `device_id` (random UUID in `userData/device.json`, via `get-device-info`) and the app version; the server allows each license on **2 Macs** and answers `code: 'device_limit'` for a third, which `App.jsx` shows as the "License in use on 2 Macs" screen. While open, the app re-validates every 15 minutes so the admin page can show "active now". The server lives in `~/Developer/SpotPlot/spotplot-server` (GitHub `wheeler-moon/spotplot-server`, private); pushing its `main` deploys to Render.
+- **`src/license.js`**: activation/validation against `https://spotplot-server.onrender.com` (a separate server, not in this repo). The result is cached in `localStorage` under `spotplot_license` and trusted for 7 days, and it falls back to the cache when offline. Every check also sends an anonymous per-Mac `device_id` (random UUID in `userData/device.json`, via `get-device-info`) and the app version; the server allows each license on **2 Macs** and answers `code: 'device_limit'` for a third, which `App.jsx` shows as the "License in use on 2 Macs" screen. While open, the app re-validates every 15 minutes so the admin page can show "active now". Settings → Deactivate… calls `/deactivate` to take this Mac off the license (only clears the local license once the server confirms). The server lives in `~/Developer/SpotPlot/spotplot-server` (GitHub `wheeler-moon/spotplot-server`, private); pushing its `main` deploys to Render.
 
 ### IPC pattern (important)
 
@@ -75,14 +75,14 @@ It must print `PASSED`. If you add a new table, a link between rows, or a new ki
 
 - `forge.config.js` signs with the owner's Developer ID and notarizes with the keychain profile `AC_PASSWORD`. The `postPackage` hook re-signs, notarizes, staples and writes `make/zip/darwin/arm64/SpotPlot-darwin.zip`. The `postMake` hook rebuilds the DMG with `dmgbuild` (Python) and `dmgbuild_settings.py` to embed the EULA (`LICENSE.rtf`/`LICENSE.txt`).
 - PDFs need Chromium. One Chrome for Testing build is pinned in `src/chromeVersion.js` (`CHROME_BUILD`). The packaged app bundles it from `~/.cache/puppeteer/chrome/mac_arm-<CHROME_BUILD>/` (`forge.config.js` `extraResource`), and `npm start` uses the same build, downloading it once if missing. To change versions, edit `CHROME_BUILD` and run `npx @puppeteer/browsers install chrome@<version>` before building. The path is passed through `global.chromiumPath`.
-- Auto-update uses `update.electronjs.org` against the GitHub repo `wheeler-moon/Followspot` (public). It only runs when `app.isPackaged`.
+- Auto-update (`src/updates.js`) uses `update.electronjs.org` against the GitHub repo `wheeler-moon/Followspot` (public). It only runs when `app.isPackaged`. It checks 10s after opening and every 4 hours unless Settings → Updates switches automatic checks off (`userData/settings.json`), and reports its state to Settings over `updates-status`.
 - Build output (`out/`, `make/`, `.webpack/`, `*.zip`, `*.dmg`) is gitignored.
 
 **Release steps:**
-1. Bump the version in `package.json` **and** the hard-coded display string in `src/screens/HomeScreen.jsx` (currently `'Beta 0.3.1'`).
-2. `npm run make`
-   Release notes: turn `CHANGELOG.md`'s Unreleased section into the new version's section (with the date) and use it for the GitHub release text. Check the website manual matches.
-3. Create a GitHub Release tagged `vX.X.X` and upload the DMG plus `make/zip/darwin/arm64/SpotPlot-darwin.zip`. That's the one the postPackage hook writes, at the **project root** `make/`. `out/make/zip/darwin/arm64/SpotPlot-darwin.zip` is a stale leftover from an older hook, so don't upload it.
+1. Bump the version in `package.json` (Settings → About reads it from there).
+2. Turn `CHANGELOG.md`'s Unreleased section into `## X.Y.Z (YYYY-MM-DD)` **before** building: the app reads that section for What's New (no internet, no GitHub link). Use the same text for the GitHub release.
+3. `npm run make`. Check the website manual matches.
+4. Create a GitHub Release tagged `vX.X.X` and upload the DMG plus `make/zip/darwin/arm64/SpotPlot-darwin.zip`. That's the one the postPackage hook writes, at the **project root** `make/`. `out/make/zip/darwin/arm64/SpotPlot-darwin.zip` is a stale leftover from an older hook, so don't upload it.
 
 ## Secrets
 

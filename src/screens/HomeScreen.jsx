@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 const { ipcRenderer } = window.require('electron');
-import { getCachedLicense } from '../license';
+import SettingsPanel from '../components/SettingsPanel';
+import WhatsNew, { justUpdated } from '../components/WhatsNew';
 import AppHeader from '../components/AppHeader';
 import Tips from '../components/Tips';
 import { TIPS } from '../tips';
@@ -20,6 +21,9 @@ export default function HomeScreen({ navigate }) {
   const [shows, setShows] = useState([]);
   const [search, setSearch] = useState('');
   const [showSettings, setShowSettings] = useState(false);
+  // The first time SpotPlot opens after an update, show what's new in it
+  const [appVersion] = useState(() => ipcRenderer.sendSync('get-device-info')?.appVersion || '');
+  const [showWhatsNew, setShowWhatsNew] = useState(() => justUpdated(appVersion));
 
   useEffect(() => {
     const result = ipcRenderer.sendSync('db-get-shows');
@@ -113,72 +117,12 @@ export default function HomeScreen({ navigate }) {
                 </div>
               </div>
             ))}
-            {showSettings && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', justifyContent: 'flex-end' }}>
-          <div onClick={() => setShowSettings(false)} style={{ flex: 1, background: 'rgba(0,0,0,0.5)' }} />
-          <div style={{ width: '340px', background: '#2A2A2A', borderLeft: '1px solid rgba(255,255,255,0.1)', display: 'flex', flexDirection: 'column', height: '100vh', overflowY: 'auto' }}>
-            <div style={{ padding: '20px 24px', borderBottom: '1px solid rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span style={{ fontSize: '16px', fontWeight: '600', color: '#FFFFFF' }}>Settings</span>
-              <button onClick={() => setShowSettings(false)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.52)', fontSize: '20px', cursor: 'pointer', lineHeight: 1 }}>×</button>
-            </div>
-            <div style={{ padding: '24px' }}>
-              <div style={{ marginBottom: '28px' }}>
-                <div style={{ fontSize: '11px', fontWeight: '600', color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '12px' }}>Account</div>
-                <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: '10px', padding: '16px' }}>
-                  {[
-                    ['Email', getCachedLicense()?.email || '—'],
-                    ['License key', getCachedLicense()?.license_key || '—'],
-                    ['Plan', getCachedLicense()?.plan || '—'],
-                    ['Status', getCachedLicense()?.status || '—'],
-                  ].map(([label, value]) => (
-                    <div key={label} style={{ marginBottom: '12px' }}>
-                      <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.45)', marginBottom: '3px', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{label}</div>
-                      <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.78)', fontFamily: label === 'License key' ? 'monospace' : 'inherit', wordBreak: 'break-all' }}>{value}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div style={{ marginBottom: '28px' }}>
-                <div style={{ fontSize: '11px', fontWeight: '600', color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '12px' }}>About SpotPlot</div>
-                <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: '10px', padding: '16px' }}>
-                  {[
-                    ['Version', 'Beta 0.3.1'],
-                    ['Built for', 'Broadway & theatre professionals'],
-                    ['Support', 'wheeler@wheelermoon.com'],
-                  ].map(([label, value]) => (
-                    <div key={label} style={{ marginBottom: '12px' }}>
-                      <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.45)', marginBottom: '3px', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{label}</div>
-                      <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.78)' }}>{value}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div style={{ marginBottom: '28px' }}>
-                <div style={{ fontSize: '11px', fontWeight: '600', color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '12px' }}>Links</div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  {[
-                    ['🌐 Visit spotplotapp.com', 'https://spotplotapp.com'],
-                    ['📧 Contact support', 'mailto:wheeler@wheelermoon.com'],
-                  ].map(([label, url]) => (
-                    <button key={label} onClick={() => { const { shell } = window.require('electron'); shell.openExternal(url); }}
-                      style={{ padding: '10px 14px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: 'rgba(255,255,255,0.62)', fontSize: '13px', cursor: 'pointer', textAlign: 'left' }}>
-                      {label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <button onClick={() => { localStorage.clear(); window.location.reload(); }}
-                style={{ width: '100%', padding: '10px', background: 'rgba(255,69,58,0.14)', border: 'none', borderRadius: '8px', color: '#FF453A', fontSize: '13px', cursor: 'pointer' }}>
-                Sign out / Deactivate license
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
           </div>
         )}
       </div>
       <Tips steps={TIPS.home} watch={shows.length} />
+      {showSettings && <SettingsPanel onClose={() => setShowSettings(false)} />}
+      {showWhatsNew && <WhatsNew version={appVersion} onClose={() => setShowWhatsNew(false)} />}
     </div>
   );
 }

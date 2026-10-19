@@ -66,3 +66,18 @@ export async function activateLicense(licenseKey, email) {
     return null;
   }
 }
+// Settings → Deactivate This Mac: takes this Mac off the license on the server, so its slot is
+// free for another Mac. Returns true only when the server confirmed it.
+export async function deactivateLicense(licenseKey) {
+  try {
+    const response = await fetch(SERVER_URL + '/deactivate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ license_key: licenseKey, device_id: device().device_id }),
+    });
+    const data = await response.json();
+    return !!data?.success;
+  } catch(e) {
+    return false;
+  }
+}

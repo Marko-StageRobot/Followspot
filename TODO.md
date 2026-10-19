@@ -15,7 +15,9 @@ Current desktop version: **0.3.1** (released 2026-10-14). Changes since then: `C
 
 ### Next (0.4.0)
 - [ ] Faster cue list loading: big shows take a couple of seconds to open
-- [ ] Update notices: today the ~290 MB update downloads silently and only one box appears at the end ("ready to install"), and the app checks only once, 10 seconds after opening. Show a small "Downloading SpotPlot X.X.X…" notice when a download starts (Electron's `autoUpdater` `update-available` event), re-check every few hours while the app is open, and make SpotPlot → Check for Updates… say "You're up to date" or "Downloading…" instead of doing nothing visible. Only helps once people have 0.4.0
+- [ ] Update notices: Settings → Updates now shows checking / downloading / ready and re-checks every 4 hours. Still to do: a small "Downloading SpotPlot X.X.X…" notice outside Settings, and SpotPlot → Check for Updates… saying "You're up to date" instead of nothing visible. Only helps once people have 0.4.0
+- [ ] Settings → About: add Terms of Service and Privacy Policy links once those pages are on the website
+- [ ] Example text pass: go through every field's grey example text (show title, operator, location, characters, search boxes… about 25 in the app, plus the iPad app's) and make sure Wheeler likes each one: real theatre-sounding examples, same style everywhere
 - [ ] First-run tips for Show Settings (spots, gels, iris sizes, Cue Settings)
 - [ ] Beta feedback: add items here as testers report them
 - [ ] Right-click menus beyond the cue boxes (same real macOS menu, `show-context-menu` in main.js): scene headers (rename, add cue), the LQ column (insert, delete, page number)
@@ -66,7 +68,7 @@ Plan: `docs/admin-dashboard-plan.md`.
 - [ ] Stripe: create and renew licenses automatically from webhooks (Standard and Student, monthly and yearly)
 - [ ] Student plan: .edu email verification
 - [ ] Admin dashboard: home (expiring soon, payments failing, by plan, revenue), search and filters, license page (extend/set expiry, change plan or device limit, revoke/reinstate, resend email, notes), history of every change, CSV export
-- [ ] Desktop app, Home → Settings → Account: Renews on / Expires on, Macs in use (1 of 2), Manage subscription (Stripe portal), and expiry / failed-payment notices
+- [ ] Stripe → licenses: webhooks fill each license's `billing_interval`, `renews_at`, `ends_at` and `payment_failed` (the server already sends them to Settings → Account), and set `STRIPE_PORTAL_URL` on Render so Settings → Manage… opens the customer portal
 - [ ] Stripe emails: turn on receipts, failed-payment and expiring-card emails, yearly renewal reminders, and the customer portal (cancel / update card)
 - [ ] Before launch: research current auto-renewal, sales-tax and international rules; checklist for a lawyer/accountant to sign off; add Terms of Service and Privacy pages to the website
 - [ ] Q1 2027: Production licenses (show, spots, close date). Q2 2027: Education licenses (school, seats)

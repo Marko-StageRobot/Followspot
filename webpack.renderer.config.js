@@ -14,6 +14,11 @@ rules.push({
   exclude: /node_modules/
 });
 
+// CHANGELOG.md is built in as text for What's New (src/components/WhatsNew.jsx)
+rules.push({
+  test: /\.md$/,
+  type: 'asset/source',
+});
 rules.push({
   test: /\.css$/,
   use: [

@@ -33,7 +33,7 @@ export default function App() {
     if (cached && cached.license_key) {
       const result = await validateLicense(cached.license_key);
       if (result && result.valid) {
-        setCachedLicense({ ...cached, valid: true, cached_at: new Date().toISOString() });
+        setCachedLicense({ ...cached, ...result, valid: true, cached_at: new Date().toISOString() });
         setLicenseStatus('valid');
         return;
       } else if (result && !result.valid) {
@@ -61,8 +61,9 @@ export default function App() {
     if (result && !result.valid) {
       markInvalid(getCachedLicense(), result);
     } else if (result && result.valid) {
+      // Keep the account details (plan, renewal date…) current for Settings
       const cached = getCachedLicense();
-      setCachedLicense({ ...cached, valid: true, cached_at: new Date().toISOString() });
+      setCachedLicense({ ...cached, ...result, valid: true, cached_at: new Date().toISOString() });
     }
   };
 

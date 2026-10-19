@@ -3,6 +3,7 @@ const path = require('node:path');
 const Database = require('better-sqlite3');
 const { exportShow, importShow } = require('./showFile');
 const ipadSync = require('./ipadSync');
+const { initUpdates } = require('./updates');
 const { buildSpotSheetHTML, buildCallerSheetHTML, buildColorLoadHTML, buildSpotNotesHTML, buildCharactersHTML, buildActionKeyHTML, buildSceneListHTML, coverPageHTML, withCoverPage, renderPDF, renderPDFBuffer, countPages, closeBrowser, PAGE_MARGINS } = require('./pdfGenerator');
 
 if (require('electron-squirrel-startup')) app.quit();
@@ -10,7 +11,6 @@ if (require('electron-squirrel-startup')) app.quit();
 // Dev only: SPOTPLOT_USER_DATA=/some/folder npm start runs on a separate copy of the app's data
 // (database, images, saved license), e.g. for a demo show, without touching your real shows.
 if (!app.isPackaged && process.env.SPOTPLOT_USER_DATA) app.setPath('userData', process.env.SPOTPLOT_USER_DATA);
-const { autoUpdater } = require('electron');
 
 let db;
 
@@ -1108,13 +1108,18 @@ app.whenReady().then(async () => {
     const body = `${prompt}\n\n\n\n---\n${details}`;
     shell.openExternal(`mailto:wheeler@wheelermoon.com?subject=${encodeURIComponent(subject + ' (' + app.getVersion() + ')')}&body=${encodeURIComponent(body)}`);
   };
+  // Settings → Help & Feedback uses the same emails
+  ipcMain.on('email-support', (event, kind) => {
+    if (kind === 'feedback') emailSupport('SpotPlot feedback', 'What would you like to tell us? Ideas, bugs, anything.');
+    else emailSupport('SpotPlot support', 'What happened, and what were you doing when it happened? A screenshot helps.');
+  });
   const template = [
     {
       label: 'SpotPlot',
       submenu: [
         { label: 'About SpotPlot', role: 'about' },
         { type: 'separator' },
-        { label: 'Check for Updates...', click: () => { if (app.isPackaged) autoUpdater.checkForUpdates(); } },
+        { label: 'Check for Updates…', click: () => updates.check() },
         { type: 'separator' },
         { label: 'Hide SpotPlot', role: 'hide' },
         { label: 'Hide Others', role: 'hideOthers' },
@@ -1185,37 +1190,7 @@ app.whenReady().then(async () => {
 
   const menu = Menu.buildFromTemplate(template);
   Menu.setApplicationMenu(menu);
- if (app.isPackaged) {
-    autoUpdater.setFeedURL({
-      url: `https://update.electronjs.org/wheeler-moon/Followspot/${process.platform}/${app.getVersion()}`,
-    });
-    autoUpdater.on('update-downloaded', (event, releaseNotes, releaseName) => {
-      const { dialog } = require('electron');
-      dialog.showMessageBox({
-        type: 'info',
-        title: 'Update Available',
-        message: `SpotPlot ${releaseName} is ready to install.`,
-        buttons: ['Install Now', 'Later'],
-      }).then(({ response }) => {
-        if (response === 0) autoUpdater.quitAndInstall();
-      });
-    });
-    autoUpdater.on('checking-for-update', () => {
-      console.log('Checking for update...');
-    });
-    autoUpdater.on('update-available', () => {
-      console.log('Update available');
-    });
-    autoUpdater.on('update-not-available', () => {
-      console.log('No update available');
-    });
-    autoUpdater.on('error', (err) => {
-      console.error('Updater error:', err);
-    });
-    setTimeout(() => {
-      autoUpdater.checkForUpdates();
-    }, 10000);
-  }
+  const updates = initUpdates({ app, getWindow: () => mainWindow });
 
  try {
     const puppeteer = require('puppeteer');
