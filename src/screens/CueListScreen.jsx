@@ -151,7 +151,13 @@ function IrisStrip({ sizes, selected, onPick }) {
   );
 }
 
-function SpotCueCell({ onDragEnd, onContextMenu, spotCue, spot, cue, fieldsShown = {}, characters, colorSlots, onUpdate, onNewCustomCharacter, lqNumber, onDragStart, onDragOver, onDragLeave, onDrop, isDragTarget, onDoubleClick, irisSizes, customActions }) {
+// Right-click Copy Cue / Paste Cue: what a spot does in a cue. Kept while the app is open,
+// for pasting within the same show (characters belong to a show)
+const COPY_FIELDS = ['action', 'character_id', 'custom_character', 'frame_size', 'intensity', 'fade_time', 'active_frames',
+  'description', 'with_lq', 'notes', 'no_color', 'highlight', 'when_highlight', 'notes_highlight'];
+let cueClipboard = null;
+
+function SpotCueCell({ onDragEnd, onContextMenu, spotCue, spot, cue, fieldsShown = {}, characters, colorSlots, onUpdate, onNewCustomCharacter, lqNumber, onDragStart, onDragOver, onDragLeave, onDrop, isDragTarget, isMenuTarget, onDoubleClick, irisSizes, customActions }) {
   const [showActionPicker, setShowActionPicker] = useState(false);
   const [hoveredFrame, setHoveredFrame] = useState(null);
   const [showCustomTime, setShowCustomTime] = useState(false);
@@ -185,7 +191,7 @@ function SpotCueCell({ onDragEnd, onContextMenu, spotCue, spot, cue, fieldsShown
       onDragLeave={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) onDragLeave(e); }}
       onDrop={(e) => { e.preventDefault(); e.stopPropagation(); onDrop(e); }}
       onDoubleClick={onDoubleClick}
-      style={{ padding: '8px 18px', borderRight: '1px solid rgba(255,255,255,0.12)', verticalAlign: 'top', minWidth: '260px', minHeight: '80px', background: isDragTarget ? 'rgba(10,132,255,0.16)' : '#191919', outline: isDragTarget ? '2px solid #0A84FF' : 'none', cursor: 'grab' }}>
+      style={{ padding: '8px 18px', borderRight: '1px solid rgba(255,255,255,0.12)', verticalAlign: 'top', minWidth: '260px', minHeight: '80px', background: isDragTarget ? 'rgba(10,132,255,0.16)' : '#191919', outline: isDragTarget || isMenuTarget ? '2px solid #0A84FF' : 'none', outlineOffset: '-2px', cursor: 'grab' }}>
         <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.22)', minHeight: '60px', display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>—</div>
     </td>
   );
@@ -247,7 +253,7 @@ const actionDef = ACTIONS.find(a => a.name === spotCue?.action) || (customAction
         onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); onDragOver(e); }}
         onDragLeave={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) onDragLeave(e); }}
         onDrop={(e) => { e.preventDefault(); e.stopPropagation(); onDrop(e); }}
-        style={{ padding: '8px 18px', borderRight: '1px solid rgba(255,255,255,0.12)', verticalAlign: 'top', minWidth: '260px', background: isDragTarget ? 'rgba(10,132,255,0.16)' : '#191919', outline: isDragTarget ? '2px solid #0A84FF' : 'none', position: 'relative' }}>
+        style={{ padding: '8px 18px', borderRight: '1px solid rgba(255,255,255,0.12)', verticalAlign: 'top', minWidth: '260px', background: isDragTarget ? 'rgba(10,132,255,0.16)' : '#191919', outline: isDragTarget || isMenuTarget ? '2px solid #0A84FF' : 'none', outlineOffset: '-2px', position: 'relative' }}>
         <div ref={ref} style={{ position: 'relative', zIndex: showActionPicker ? 99999 : 'auto' }}>
           <div ref={actionBtnRef} data-tour="cue-action" onClick={() => {
             if (actionBtnRef.current) {
@@ -287,7 +293,7 @@ const actionDef = ACTIONS.find(a => a.name === spotCue?.action) || (customAction
         verticalAlign: 'top', 
         minWidth: '260px', 
         position: 'relative',
-        outline: isDragTarget ? '2px solid #0A84FF' : 'none', 
+        outline: isDragTarget || isMenuTarget ? '2px solid #0A84FF' : 'none', outlineOffset: '-2px', 
         background: isDragTarget ? 'rgba(10,132,255,0.16)' : spotCue?.highlight === 'yellow' ? 'rgba(255,214,10,0.12)' : spotCue?.highlight === 'red' ? 'rgba(255,69,58,0.12)' : spotCue?.ignored ? 'rgba(255,69,58,0.08)' : 'transparent',
         cursor: 'grab',
         opacity: spotCue?.ignored ? 0.5 : 1,
@@ -544,7 +550,7 @@ function HeaderColorLoad({ slots, perm }) {
   );
 }
 
-function CueRow({ onDragFinished, onCellMenu, cue, isLastCue, fieldsShown, spots, spotCues, characters, colorSlotsBySpot, scenes, onUpdateCue, onUpdateSpotCue, onNewCustomCharacter, onDelete, onInsertAfter, dragSource, dragTarget, setDragSource, setDragTarget, setShowDragModal, onCueDoubleClick, irisSizes, customActions }) {
+function CueRow({ onDragFinished, onCellMenu, menuCell, cue, isLastCue, fieldsShown, spots, spotCues, characters, colorSlotsBySpot, scenes, onUpdateCue, onUpdateSpotCue, onNewCustomCharacter, onDelete, onInsertAfter, dragSource, dragTarget, setDragSource, setDragTarget, setShowDragModal, onCueDoubleClick, irisSizes, customActions }) {
   const [editingLQ, setEditingLQ] = useState(false);
   const [lqVal, setLqVal] = useState(cue.lq_number || '');
 
@@ -634,6 +640,7 @@ function CueRow({ onDragFinished, onCellMenu, cue, isLastCue, fieldsShown, spots
               onDragEnd={() => onDragFinished(false)}
               onContextMenu={(e) => { e.preventDefault(); onCellMenu({ x: e.clientX, y: e.clientY, spotCue: sc, spot, cue }); }}
               isDragTarget={dragTarget?.cue?.id === cue?.id && dragTarget?.spot?.id === spot?.id}
+              isMenuTarget={menuCell?.cueId === cue.id && menuCell?.spotId === spot.id}
               irisSizes={irisSizes}
               customActions={customActions}
               onDoubleClick={(e) => {
@@ -870,24 +877,21 @@ export default function CueListScreen({ show, navigate }) {
     }
   };
 
-  // Right-click menu on a cue cell
-  const [cellMenu, setCellMenu] = useState(null);
+  // Right-click menu on a cue cell: a real macOS menu (main.js 'show-context-menu'). The cell stays
+  // outlined while its menu is open; the chosen item comes back as 'context-menu-action'.
+  const [menuCell, setMenuCell] = useState(null);
+  const menuTargetRef = useRef(null);
+  const menuActionRef = useRef(null);
   useEffect(() => {
-    if (!cellMenu) return;
-    const close = () => setCellMenu(null);
-    const onKey = (e) => { if (e.key === 'Escape') close(); };
-    window.addEventListener('mousedown', close);
-    window.addEventListener('keydown', onKey);
-    window.addEventListener('blur', close);
-    const scroller = scrollRef.current;
-    scroller?.addEventListener('scroll', close);
+    const onAction = (_e, id) => menuActionRef.current?.(id);
+    const onClosed = () => setMenuCell(null);
+    ipcRenderer.on('context-menu-action', onAction);
+    ipcRenderer.on('context-menu-closed', onClosed);
     return () => {
-      window.removeEventListener('mousedown', close);
-      window.removeEventListener('keydown', onKey);
-      window.removeEventListener('blur', close);
-      scroller?.removeEventListener('scroll', close);
+      ipcRenderer.removeListener('context-menu-action', onAction);
+      ipcRenderer.removeListener('context-menu-closed', onClosed);
     };
-  }, [cellMenu]);
+  }, []);
 
   // Clear cue: puts everything this spot does in this cue back to blank. One ⌘Z brings it all back.
   const BLANK_SPOT_CUE = {
@@ -905,6 +909,92 @@ export default function CueListScreen({ show, navigate }) {
     if (!entries.length) return;
     entries.forEach(e => updateSpotCue(sc.id, e.field, e.newValue, true));
     undoStackRef.current = [...undoStackRef.current.slice(-49), { type: 'batch', entries }];
+  };
+
+  // Sets several fields of one spot cue as a single ⌘Z step
+  const setSpotCueFields = (row, values) => {
+    const entries = Object.keys(values)
+      .filter(f => (row[f] ?? null) !== (values[f] ?? null))
+      .map(f => ({ type: 'spot-cue', spotCueId: row.id, field: f, oldValue: row[f] ?? null, newValue: values[f] ?? null }));
+    if (!entries.length) return;
+    entries.forEach(e => updateSpotCue(row.id, e.field, e.newValue, true));
+    undoStackRef.current = [...undoStackRef.current.slice(-49), { type: 'batch', entries }];
+  };
+  // Every spot has a row for every cue, but make one if it's somehow missing
+  const ensureSpotCue = (spot, cue, sc) => {
+    if (sc?.id) return sc;
+    const result = upsertSpotCue(spot.id, cue.id, 'action', '');
+    return { spot_id: spot.id, cue_id: cue.id, id: result?.id, action: '' };
+  };
+  const cueName = (cue) => cue.lq_number ? `LQ ${cue.lq_number}` : `T·${cue.track_number}`;
+
+  const openCellMenu = ({ spotCue: sc, spot, cue }) => {
+    const clip = cueClipboard && cueClipboard.showId === show.id ? cueClipboard : null;
+    const sep = { type: 'separator' };
+    const highlightItems = (field, label) => [
+      { label, enabled: false },
+      { id: `hl:${field}:yellow`, label: 'Yellow', checked: sc?.[field] === 'yellow' },
+      { id: `hl:${field}:red`, label: 'Red', checked: sc?.[field] === 'red' },
+    ];
+    const items = [
+      { label: `Spot ${spot.spot_number} · ${cueName(cue)}`, enabled: false },
+      sep,
+      { id: 'copy', label: 'Copy Cue', enabled: !!sc },
+      { id: 'paste', label: clip ? `Paste Cue (Spot ${clip.spotNumber} · ${clip.cueName})` : 'Paste Cue', enabled: !!clip },
+      { id: 'paste-no-char', label: 'Paste Cue Without Character', enabled: !!clip },
+      sep,
+      { label: 'Highlight', submenu: [...highlightItems('highlight', 'Whole Cue'), sep, ...highlightItems('when_highlight', 'When Line'), sep, ...highlightItems('notes_highlight', 'Notes Line')] },
+      { id: 'ignore', label: 'Ignore Cue', checked: !!sc?.ignored },
+      { id: 'note', label: sc?.spot_note ? 'Edit Spot Note…' : 'Add Spot Note…' },
+      sep,
+      { id: 'insert-above', label: 'Insert Cue Above' },
+      { id: 'insert-below', label: 'Insert Cue Below' },
+      { id: 'delete', label: `Delete ${cueName(cue)}…` },
+      sep,
+      { id: 'clear', label: 'Clear Cue', enabled: canClear(sc) },
+    ];
+    menuTargetRef.current = { spotCue: sc, spot, cue };
+    setMenuCell({ spotId: spot.id, cueId: cue.id });
+    ipcRenderer.send('show-context-menu', items);
+  };
+
+  // Runs the chosen menu item (refreshed every render so it sees the latest cues)
+  menuActionRef.current = (id) => {
+    const target = menuTargetRef.current;
+    if (!target) return;
+    const { spot, cue } = target;
+    const sc = (data?.spotCues || []).find(x => x.spot_id === spot.id && x.cue_id === cue.id) || target.spotCue;
+    if (id === 'copy') {
+      cueClipboard = { showId: show.id, spotNumber: spot.spot_number, cueName: cueName(cue),
+        values: Object.fromEntries(COPY_FIELDS.map(f => [f, sc?.[f] ?? null])) };
+    } else if (id === 'paste' || id === 'paste-no-char') {
+      if (!cueClipboard || cueClipboard.showId !== show.id) return;
+      const values = { ...cueClipboard.values };
+      if (id === 'paste-no-char') { delete values.character_id; delete values.custom_character; }
+      // Keep only frames this spot has (spots can have fewer frames)
+      const frames = new Set((colorSlotsBySpot[spot.id] || []).map(s => 'F' + s.slot_number));
+      values.active_frames = (values.active_frames || '').split(',').filter(f => frames.has(f)).join(',');
+      setSpotCueFields(ensureSpotCue(spot, cue, sc), values);
+    } else if (id.startsWith('hl:')) {
+      const [, field, color] = id.split(':');
+      setSpotCueFields(ensureSpotCue(spot, cue, sc), { [field]: sc?.[field] === color ? null : color });
+    } else if (id === 'ignore') {
+      setSpotCueFields(ensureSpotCue(spot, cue, sc), { ignored: sc?.ignored ? 0 : 1 });
+    } else if (id === 'note') {
+      const row = ensureSpotCue(spot, cue, sc);
+      setCuePopup({ cue, spot, spotCue: row });
+      setPopupNote(row.spot_note || '');
+      setTimeout(() => document.getElementById('popup-note-textarea')?.focus(), 50);
+    } else if (id === 'insert-above') {
+      ipcRenderer.sendSync('db-create-cue', { showId: show.id, sceneId: cue.scene_id, beforeCueId: cue.id });
+      load();
+    } else if (id === 'insert-below') {
+      insertCueAfter(cue.id, cue.scene_id);
+    } else if (id === 'delete') {
+      if (window.confirm(`Delete ${cueName(cue)}? It's removed for every spot.`)) deleteCue(cue.id);
+    } else if (id === 'clear') {
+      clearSpotCue(sc);
+    }
   };
 
   const deleteCue = (cueId) => {
@@ -1078,7 +1168,7 @@ const groupedCues = () => {
                       onUpdateCue={updateCue} onUpdateSpotCue={updateSpotCue} onNewCustomCharacter={addCustomCharacterToShow}
                       onDelete={deleteCue} onInsertAfter={insertCueAfter}
                       dragSource={dragSource} dragTarget={dragTarget}
-                      setDragSource={setDragSource} setDragTarget={setDragTarget} onDragFinished={dragFinished} onCellMenu={setCellMenu}
+                      setDragSource={setDragSource} setDragTarget={setDragTarget} onDragFinished={dragFinished} onCellMenu={openCellMenu} menuCell={menuCell}
                       setShowDragModal={setShowDragModal}
                       irisSizes={irisSizes}
                       customActions={customActions}
@@ -1205,25 +1295,6 @@ const groupedCues = () => {
           </div>
         </div>
       )}
-        {cellMenu && (() => {
-          const ok = canClear(cellMenu.spotCue);
-          const item = { height: '22px', padding: '0 10px', borderRadius: '6px', display: 'flex', alignItems: 'center', fontSize: '13px' };
-          return (
-            <div onMouseDown={e => e.stopPropagation()} onContextMenu={e => e.preventDefault()}
-              style={{ position: 'fixed', zIndex: 100000, left: Math.min(cellMenu.x, window.innerWidth - 200), top: Math.min(cellMenu.y, window.innerHeight - 70),
-                width: '190px', background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '10px', padding: '5px', boxShadow: '0 18px 48px rgba(0,0,0,0.45)' }}>
-              <div style={{ ...item, fontSize: '11px', color: 'rgba(255,255,255,0.45)', cursor: 'default' }}>
-                Spot {cellMenu.spot?.spot_number} · LQ {cellMenu.cue?.lq_number || '—'}
-              </div>
-              <div onClick={() => { if (ok) { clearSpotCue(cellMenu.spotCue); setCellMenu(null); } }}
-                style={{ ...item, color: ok ? '#FF453A' : 'rgba(255,255,255,0.3)', cursor: ok ? 'default' : 'not-allowed' }}
-                onMouseEnter={e => { if (ok) { e.currentTarget.style.background = '#0A84FF'; e.currentTarget.style.color = '#FFFFFF'; } }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = ok ? '#FF453A' : 'rgba(255,255,255,0.3)'; }}>
-                Clear cue
-              </div>
-            </div>
-          );
-        })()}
         {showDragModal && dragSource && dragTarget && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 99999, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ background: '#2A2A2A', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '16px', padding: '28px', width: '400px' }}>

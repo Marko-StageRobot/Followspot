@@ -372,6 +372,25 @@ function setupIPC() {
       event.returnValue = { success: false, error: e.message };
     }
   });
+  // Right-click menus drawn by macOS. The renderer describes the items ({ id, label, enabled,
+  // checked, submenu, type }); a click sends 'context-menu-action' back with the item's id, and
+  // 'context-menu-closed' fires when the menu goes away either way.
+  ipcMain.on('show-context-menu', (event, items) => {
+    const { Menu } = require('electron');
+    const toTemplate = (list) => (list || []).map(it => {
+      if (it.type === 'separator') return { type: 'separator' };
+      const entry = { label: it.label, enabled: it.enabled !== false };
+      if (it.submenu) entry.submenu = toTemplate(it.submenu);
+      else if (it.id) entry.click = () => event.sender.send('context-menu-action', it.id);
+      if (it.checked !== undefined) { entry.type = 'checkbox'; entry.checked = !!it.checked; }
+      return entry;
+    });
+    Menu.buildFromTemplate(toTemplate(items)).popup({
+      window: BrowserWindow.fromWebContents(event.sender),
+      callback: () => { if (!event.sender.isDestroyed()) event.sender.send('context-menu-closed'); },
+    });
+  });
+
   // Anonymous ID for this Mac (the license server allows each license on 2 Macs).
   // Random, created once, kept in SpotPlot's data folder: no names or hardware info.
   ipcMain.on('get-device-info', (event) => {
@@ -874,7 +893,8 @@ ipcMain.on('db-get-show-stats', (event, showId) => {
     }
   });
 
-  ipcMain.on('db-create-cue', (event, { showId, sceneId, afterCueId }) => {
+  // afterCueId puts the new cue after that one; beforeCueId (right-click Insert Cue Above) puts it before
+  ipcMain.on('db-create-cue', (event, { showId, sceneId, afterCueId, beforeCueId }) => {
     try {
       const database = getDb();
       const maxTrack = database.prepare('SELECT MAX(track_number) as m FROM cues WHERE show_id = ?').get(showId);
@@ -886,7 +906,11 @@ ipcMain.on('db-get-show-stats', (event, showId) => {
       let insertIndex;
       let prevCueId = null;
 
-      if (afterCueId) {
+      if (beforeCueId) {
+        // Same as inserting after the cue before it; at the very top, insertIndex is -1
+        insertIndex = allCues.findIndex(c => c.id === beforeCueId) - 1;
+        prevCueId = insertIndex >= 0 ? allCues[insertIndex].id : null;
+      } else if (afterCueId) {
         insertIndex = allCues.findIndex(c => c.id === afterCueId);
         prevCueId = afterCueId;
       } else {
@@ -903,6 +927,8 @@ ipcMain.on('db-get-show-stats', (event, showId) => {
         } else {
           newSortOrder = afterCue.sort_order + 1000;
         }
+      } else if (beforeCueId && allCues.length) {
+        newSortOrder = allCues[0].sort_order - 500;
       } else {
         newSortOrder = (allCues.length + 1) * 1000;
       }

@@ -142,7 +142,7 @@ A highlighted cue gets its color at 24% across the row plus a solid 5pt bar on i
 Several color frames are written **F1+2** (the F once, frames in number order), on prints and on the iPad.
 
 ### Right-click (context) menus
-Popover fill `#1A1A1A`, 1px `rgba(255,255,255,0.12)` border, radius 10, 5px padding, popover shadow, about 190px wide. Optional first line: a small Label 2 heading saying what was clicked (e.g. "Spot 1 · LQ 20"). Items are 22px high, Regular 13, radius 6; hover is an accent (`#0A84FF`) fill with white text, like macOS. Destructive items use the red label. An item that can't apply is shown at 30% and does nothing. Closes on click outside, Esc, scroll or leaving the window.
+Use the **real macOS menu**, not one we draw: send the items to main.js with `ipcRenderer.send('show-context-menu', items)` (`{ id, label, enabled, checked, submenu }` or `{ type: 'separator' }`); the chosen item comes back as `context-menu-action` with its id, and `context-menu-closed` when it goes away. macOS handles the look, keyboard and dark mode. First line: a disabled item saying what was clicked ("Spot 1 · LQ 20"). Title Case labels, "…" when the item opens a box or asks first, a checkmark for on/off items (Ignore Cue, highlight colors), separators between groups, and a submenu rather than a long list (Highlight ▸). Gray out what can't apply instead of hiding it. While the menu is open, the clicked item gets a 2px accent (`#0A84FF`) outline, like Finder.
 
 ### Pop-up buttons (dropdowns)
 Height 24px, radius 6, bordered-button fill, with a chevron on the right.

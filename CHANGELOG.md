@@ -7,7 +7,7 @@ Sections: Cue list · Printing · Spots & shows · iPad · Fixes · Other. Websi
 ## Unreleased
 
 Cue list
-- Right-click a spot's box in a cue for a menu. **Clear cue** empties it so you can start that cue from scratch (a spot that's Off stays Off). ⌘Z brings it all back
+- Right-click a spot's box in a cue for a real Mac menu: **Copy Cue** and **Paste Cue** (or Paste Cue Without Character) to copy what a spot does into another spot or cue, a **Highlight** submenu (whole cue, When line, Notes line), **Ignore Cue**, **Add Spot Note…**, **Insert Cue Above / Below**, **Delete** the cue, and **Clear Cue**, which empties the box so you can start that cue from scratch (a spot that's Off stays Off). ⌘Z undoes paste, highlight, ignore and clear
 - Click the little color button next to a spot's name at the top of the cue list to keep that spot's whole color load in view (frames and permanent color). It stays open until you close it, even after leaving the cue list
 - Double-clicking a word in When or Notes selects that word, like any text box. Double-click anywhere else in a spot's box to open its options
 - Renumber T· can be undone: press ⌘Z right after to put every cue's old T· number back
