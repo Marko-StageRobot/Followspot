@@ -95,3 +95,4 @@ out/
 make/
 *.zip
 *.dmg
+native/filemaker-reader/build/

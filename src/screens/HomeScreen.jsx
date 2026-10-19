@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 const { ipcRenderer } = window.require('electron');
 import SettingsPanel from '../components/SettingsPanel';
 import WhatsNew, { justUpdated } from '../components/WhatsNew';
+import FileMakerImport from '../components/FileMakerImport';
 import AppHeader from '../components/AppHeader';
 import Tips from '../components/Tips';
 import { TIPS } from '../tips';
@@ -24,6 +25,39 @@ export default function HomeScreen({ navigate }) {
   // The first time SpotPlot opens after an update, show what's new in it
   const [appVersion] = useState(() => ipcRenderer.sendSync('get-device-info')?.appVersion || '');
   const [showWhatsNew, setShowWhatsNew] = useState(() => justUpdated(appVersion));
+  const [fileMakerSummary, setFileMakerSummary] = useState(null);   // Import from FileMaker, once a file is chosen
+
+  const refreshShows = () => {
+    const updated = ipcRenderer.sendSync('db-get-shows');
+    setShows(Array.isArray(updated) ? updated : []);
+    return Array.isArray(updated) ? updated : [];
+  };
+  const importSpotPlotFile = () => {
+    const result = ipcRenderer.sendSync('db-import-show');
+    if (result.success) {
+      alert('Show imported successfully!');
+      refreshShows();
+    } else if (!result.cancelled) alert('Import failed: ' + result.error);
+  };
+  const chooseFileMakerFile = () => {
+    const result = ipcRenderer.sendSync('filemaker-choose');
+    if (result.success) setFileMakerSummary(result.summary);
+    else if (!result.cancelled) alert(result.error);
+  };
+  // Import ▾: a SpotPlot show file, or a FileMaker show
+  useEffect(() => {
+    const onAction = (_e, id) => {
+      if (id === 'import-spotplot') importSpotPlotFile();
+      if (id === 'import-filemaker') chooseFileMakerFile();
+    };
+    const onMenu = () => chooseFileMakerFile();
+    ipcRenderer.on('context-menu-action', onAction);
+    ipcRenderer.on('menu-import-filemaker', onMenu);
+    return () => {
+      ipcRenderer.removeListener('context-menu-action', onAction);
+      ipcRenderer.removeListener('menu-import-filemaker', onMenu);
+    };
+  }, []);
 
   useEffect(() => {
     const result = ipcRenderer.sendSync('db-get-shows');
@@ -64,15 +98,11 @@ export default function HomeScreen({ navigate }) {
           placeholder="Search shows..."
           style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '6px', color: '#FFFFFF', padding: '6px 12px', fontSize: '13px', outline: 'none', width: '200px' }}
         />
-        <button data-tour="import-show" onClick={() => {
-          const result = ipcRenderer.sendSync('db-import-show');
-          if (result.success) {
-            alert('Show imported successfully!');
-            const updated = ipcRenderer.sendSync('db-get-shows');
-            setShows(Array.isArray(updated) ? updated : []);
-          } else if (!result.cancelled) alert('Import failed: ' + result.error);
-        }} style={{ padding: '8px 14px', background: 'rgba(255,255,255,0.10)', border: 'none', borderRadius: '8px', color: '#FFFFFF', fontSize: '13px', cursor: 'pointer' }}>
-          ↓ Import
+        <button data-tour="import-show" onClick={() => ipcRenderer.send('show-context-menu', [
+          { id: 'import-spotplot', label: 'SpotPlot Show File…' },
+          { id: 'import-filemaker', label: 'FileMaker Show…' },
+        ])} style={{ padding: '8px 14px', background: 'rgba(255,255,255,0.10)', border: 'none', borderRadius: '8px', color: '#FFFFFF', fontSize: '13px', cursor: 'pointer' }}>
+          ↓ Import ▾
         </button>
         <button data-tour="new-show" onClick={() => navigate('new-show')} style={{ padding: '8px 18px', background: '#0A84FF', color: '#FFFFFF', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: '500', cursor: 'pointer' }}>+ New Show</button>
       </AppHeader>
@@ -122,6 +152,12 @@ export default function HomeScreen({ navigate }) {
       </div>
       <Tips steps={TIPS.home} watch={shows.length} />
       {showSettings && <SettingsPanel onClose={() => setShowSettings(false)} />}
+      {fileMakerSummary && <FileMakerImport summary={fileMakerSummary} onCancel={() => setFileMakerSummary(null)}
+        onImported={(showId) => {
+          setFileMakerSummary(null);
+          const show = refreshShows().find(s => s.id === showId);
+          if (show) navigate('show', show);
+        }} />}
       {showWhatsNew && <WhatsNew version={appVersion} onClose={() => setShowWhatsNew(false)} />}
     </div>
   );

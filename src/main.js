@@ -4,6 +4,7 @@ const Database = require('better-sqlite3');
 const { exportShow, importShow } = require('./showFile');
 const ipadSync = require('./ipadSync');
 const { initUpdates } = require('./updates');
+const fileMaker = require('./fileMakerImport');
 const { buildSpotSheetHTML, buildCallerSheetHTML, buildColorLoadHTML, buildSpotNotesHTML, buildCharactersHTML, buildActionKeyHTML, buildSceneListHTML, coverPageHTML, withCoverPage, renderPDF, renderPDFBuffer, countPages, closeBrowser, PAGE_MARGINS } = require('./pdfGenerator');
 
 if (require('electron-squirrel-startup')) app.quit();
@@ -449,6 +450,40 @@ function setupIPC() {
       event.returnValue = { success: true, showId };
     } catch(e) {
       console.error('Import error:', e);
+      event.returnValue = { success: false, error: e.message };
+    }
+  });
+  // File → Import from FileMaker…: pick FS_Track.fmp12, see what's in it and what needs matching,
+  // then import with the person's choices (src/fileMakerImport.js)
+  let pendingFileMaker = null;
+  ipcMain.on('filemaker-choose', async (event) => {
+    try {
+      const { dialog } = require('electron');
+      const { filePaths } = await dialog.showOpenDialog({
+        title: 'Import from FileMaker',
+        message: 'Choose the show’s FS_Track.fmp12 file. SceneList.fmp12 is read too if it’s in the same folder.',
+        filters: [{ name: 'FileMaker', extensions: ['fmp12'] }],
+        properties: ['openFile'],
+      });
+      if (!filePaths || !filePaths[0]) { event.returnValue = { success: false, cancelled: true }; return; }
+      pendingFileMaker = fileMaker.loadFileMakerShow(app, filePaths[0]);
+      event.returnValue = { success: true, summary: pendingFileMaker.summary };
+    } catch(e) {
+      console.error('FileMaker read error:', e);
+      event.returnValue = { success: false, error: e.message };
+    }
+  });
+  ipcMain.on('filemaker-import', (event, choices) => {
+    try {
+      if (!pendingFileMaker) throw new Error('Choose a FileMaker file first.');
+      const findGel = getDb().prepare("SELECT gel_name FROM gels WHERE UPPER(REPLACE(gel_number, ' ', '')) = ?");
+      const gelName = (number) => (findGel.get(number.toUpperCase()) || {}).gel_name || '';
+      const data = fileMaker.buildShowData(pendingFileMaker, choices, gelName);
+      const { showId } = importShow(getDb(), data, { imagesDir: imagesDir() });
+      pendingFileMaker = null;
+      event.returnValue = { success: true, showId };
+    } catch(e) {
+      console.error('FileMaker import error:', e);
       event.returnValue = { success: false, error: e.message };
     }
   });
@@ -1134,6 +1169,7 @@ app.whenReady().then(async () => {
         { label: 'New Show', accelerator: 'CmdOrCtrl+N', click: () => { mainWindow.webContents.send('menu-new-show'); } },
         { label: 'Export Show', accelerator: 'CmdOrCtrl+E', click: () => { mainWindow.webContents.send('menu-export-show'); } },
         { label: 'Import Show', accelerator: 'CmdOrCtrl+I', click: () => { mainWindow.webContents.send('menu-import-show'); } },
+        { label: 'Import from FileMaker…', click: () => { mainWindow.webContents.send('menu-import-filemaker'); } },
         { type: 'separator' },
         { label: 'Close Window', role: 'close' },
       ],

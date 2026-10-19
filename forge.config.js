@@ -11,6 +11,8 @@ module.exports = {
       './src/icon.png',
       './src/icons/icons/mac/icon.icns',
       `${process.env.HOME}/.cache/puppeteer/chrome/mac_arm-${CHROME_BUILD}/chrome-mac-arm64/Google Chrome for Testing.app`,
+      // Reads FileMaker files for File → Import from FileMaker… (built by the generateAssets hook)
+      './native/filemaker-reader/build/fmp2spotplot',
     ],
     osxSign: {
       identity: 'Developer ID Application: WHEELER DAVID MOON (299TQ9H5QB)',
@@ -70,6 +72,11 @@ module.exports = {
   },
   rebuildConfig: {},
   hooks: {
+    // Before `npm start` and `npm run make`: build the FileMaker reader (native/filemaker-reader)
+    generateAssets: async () => {
+      if (process.platform !== 'darwin') return;
+      require('child_process').execSync('sh native/filemaker-reader/build.sh', { stdio: 'inherit' });
+    },
     postPackage: async (forgeConfig, options) => {
       if (process.platform !== 'darwin') return;
       const { execSync } = require('child_process');

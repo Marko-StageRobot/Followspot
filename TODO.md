@@ -16,6 +16,7 @@ Current desktop version: **0.3.1** (released 2026-10-14). Changes since then: `C
 ### Next (0.4.0)
 - [ ] Faster cue list loading: big shows take a couple of seconds to open
 - [ ] Update notices: Settings → Updates now shows checking / downloading / ready and re-checks every 4 hours. Still to do: a small "Downloading SpotPlot X.X.X…" notice outside Settings, and SpotPlot → Check for Updates… saying "You're up to date" instead of nothing visible. Only helps once people have 0.4.0
+- [ ] FileMaker import, next: try more FileMaker show files (older template versions, other designers' shows, 4-spot shows, encrypted ones) and add any action names or field layouts they use; bring across logos and actor photos if the files keep them inside (FMP Tools doesn't read pictures yet); first `npm run make` with the reader inside: check it's signed and runs in the installed app
 - [ ] Example text pass: go through every field's grey example text (show title, operator, location, characters, search boxes… about 25 in the app, plus the iPad app's) and make sure Wheeler likes each one: real theatre-sounding examples, same style everywhere
 - [ ] First-run tips for Show Settings (spots, gels, iris sizes, Cue Settings)
 - [ ] Beta feedback: add items here as testers report them
@@ -29,7 +30,6 @@ Current desktop version: **0.3.1** (released 2026-10-14). Changes since then: `C
 - [ ] Settings popup: more robust app-wide toggles
 - [ ] Finder preview of `.spotplot` files shows that show's logo (the small file icon stays the SpotPlot logo). Needs a Quick Look **Preview** extension (not a Thumbnail extension, which would replace the icon): a small Swift `.appex` that reads the file's JSON, decodes the embedded logo from `images[show.logo_path]`, and shows it, falling back to the SpotPlot icon. Requires Xcode, building the appex as part of `npm run make`, and embedding it in `SpotPlot.app/Contents/PlugIns` before signing/notarizing (app extensions must be sandboxed). Test from a signed, installed build.
 - [ ] Shrink the app (~290 MB → ~100 MB) by rendering PDFs with Electron's built-in Chromium (`webContents.printToPDF` in a hidden window) instead of bundling Chrome for Testing. Smaller downloads and updates, faster notarization, fewer files to sign. **Caution:** an earlier attempt had PDF problems, which is why Chrome was bundled; compare every sheet type against the current output before switching, and keep the bundled Chrome as a fallback until verified.
-- [ ] Import a SpotOn file (a CSV export) and automatically build a SpotPlot show from it: spots, cues and each spot's cue data. Needs a sample SpotOn CSV to map its columns
 - [ ] Windows version
 - [ ] **Make the app's code private** (do it alongside a release). Two repos: `Followspot` goes private (source code); a new public `spotplot-releases` holds only the DMG and zip for each release, with no code. Steps:
   1. Create `spotplot-releases` (public).

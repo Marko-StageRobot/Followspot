@@ -7,7 +7,7 @@ export const TIPS = {
     { id: 'home-new', target: 'new-show', title: 'Start a new show',
       body: 'Name the show, add your followspots and load each spot\'s color frames. You can change all of it later.' },
     { id: 'home-import', target: 'import-show', title: 'Open a shared show',
-      body: 'Got a .spotplot file from your team? Import it here, or double-click the file in Finder.' },
+      body: 'Got a .spotplot file from your team? Import it here, or double-click the file in Finder. Have shows in a FileMaker followspot database? Import brings those in too.' },
     { id: 'home-card', target: 'show-card', title: 'Your shows',
       body: 'Click a show to open it.' },
   ],

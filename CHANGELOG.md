@@ -6,6 +6,8 @@ Sections: Cue list · Printing · Spots & shows · iPad · Fixes · Other. Websi
 
 ## Unreleased
 
+New: **Import from FileMaker.** Bring followspot shows over from a FileMaker database (the FileMaker followspot paperwork many designers use), without needing FileMaker: Home → Import ▾ → FileMaker Show…, or File → Import from FileMaker…. Choose the show's FS_Track.fmp12 (SceneList.fmp12 next to it comes too). The show's details, team, spots and gels, characters, scenes and every cue come across; actions or iris sizes in the file that aren't exactly SpotPlot's are matched by you, or kept as custom ones.
+
 Cue list
 - Right-click a spot's box in a cue for a real Mac menu: **Copy Cue** and **Paste Cue** (or Paste Cue Without Character) to copy what a spot does into another spot or cue, a **Highlight** submenu (whole cue, When line, Notes line), **Ignore Cue**, **Add Spot Note…**, **Insert Cue Above / Below**, **Delete** the cue, and **Clear Cue**, which empties the box so you can start that cue from scratch (a spot that's Off stays Off). ⌘Z undoes paste, highlight, ignore and clear
 - Click the little color button next to a spot's name at the top of the cue list to keep that spot's whole color load in view (frames and permanent color). It stays open until you close it, even after leaving the cue list
