@@ -2,7 +2,7 @@
 
 The contract between SpotPlot on the Mac (`src/ipadSync.js`) and SpotPlot for iPad. **Both apps must follow this document.** Change it in the same commit as the code, and bump the version on any change the other side would notice.
 
-**Protocol version: 1** (desktop sends it in `/api/hello` and in its Bonjour record as `protocol=1`).
+**Protocol version: 2** (desktop sends it in `/api/hello` and in its Bonjour record as `protocol=2`). Version 2 (2026-10-17) made pairing per show: version 1 iPads and Macs refuse each other with an "update" message.
 
 ## Rules for changing it
 
@@ -12,7 +12,9 @@ The contract between SpotPlot on the Mac (`src/ipadSync.js`) and SpotPlot for iP
 
 ## Finding and pairing
 
-- The Mac advertises Bonjour service `_spotplot._tcp` (name "SpotPlot on <Computer Name>", TXT `protocol=1`) while Show Settings → iPad Sync → "Let iPads connect" is on.
+- The Mac advertises Bonjour service `_spotplot._tcp` (name "SpotPlot on <Computer Name>", TXT `protocol=2`) while any show has Show Settings → iPad Sync → "Let iPads connect to this show" on.
+- **Pairing is per show.** Each show has its own switch and 6-digit code (kept on the Mac in `userData/ipad-sync.json` under `shows[showId]`, never in a show file). Entering a show's code gives the iPad a token for **that show only**. To add another show, the iPad enters that show's code. "New code" changes the code for new pairings; iPads already paired stay paired.
+- A show with its switch off is invisible: its code is refused and its paired iPads get `403` until it's switched on again.
 - Port 47800 by default; any free port if that's taken (Bonjour carries the real one). The iPad Sync tab shows the address for typing in by hand.
 - Plain HTTP on the local network, JSON bodies.
 
@@ -21,13 +23,13 @@ The contract between SpotPlot on the Mac (`src/ipadSync.js`) and SpotPlot for iP
 | Request | Auth | Body / query | Response |
 |---|---|---|---|
 | `GET /api/hello` | none | | `{ app: "SpotPlot", protocol, version, name }` |
-| `POST /api/pair` | none | `{ code, deviceId, deviceName }` | `200 { token, name }`; `403` wrong code; `429` after 5 wrong codes in a minute |
-| `POST /api/presence` | token | `{ showId, role, spots }` (role `spot` or `caller`; `spots` = spot numbers) | `{ ok: true }`. Send every ~5 s; the Mac shows an iPad as online if seen in the last 15 s |
-| `GET /api/shows` | token | | `{ shows: [{ id, title, theatre, num_spots, version }] }` |
-| `GET /api/shows/:id` | token | | the `.spotplot` export JSON plus `sync_version` |
-| `GET /api/shows/:id/pdf` | token | `kind=spot&spotId=…` or `kind=caller` | `application/pdf` |
+| `POST /api/pair` | none | `{ code, deviceId, deviceName }` | `200 { token, name, showId, title }` (the show the code belongs to); `403` no show with that code has iPad Sync on; `429` after 5 wrong codes in a minute |
+| `POST /api/presence` | token | `{ role, spots }` (role `spot` or `caller`; `spots` = spot numbers) | `{ ok: true }`. Send every ~5 s; the Mac shows an iPad as online (on that show) if seen in the last 15 s |
+| `GET /api/shows` | token | | `{ shows: [{ id, title, theatre, num_spots, version }] }`: only the token's show |
+| `GET /api/shows/:id` | token | | the `.spotplot` export JSON plus `sync_version`; `404` for any show but the token's |
+| `GET /api/shows/:id/pdf` | token | `kind=spot&spotId=…` or `kind=caller` | `application/pdf` (token's show only) |
 
-Auth: `Authorization: Bearer <token>` from pairing. `401` means the iPad was forgotten on the Mac and must pair again.
+Auth: `Authorization: Bearer <token>` from pairing (one token per show). `401` means the iPad was forgotten for that show (or never paired with it) and must enter the show's code again. `403` means iPad Sync is off for that show. `404` on a list request means the show was deleted on the Mac.
 
 ## Show data notes
 

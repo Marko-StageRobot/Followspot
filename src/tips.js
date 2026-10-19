@@ -37,7 +37,7 @@ export const TIPS = {
     { id: 'cue-action', target: 'cue-action', title: 'What the spot does',
       body: 'Pick an action like Pick Up, Fade Out or Off, then the character. Off means the spot isn\'t used in that cue.' },
     { id: 'cue-look', target: 'cue-look', title: 'Iris and color',
-      body: 'Pick the iris size, then click the color frames to use. Two frames on reads as F1+F2. NC means no color.' },
+      body: 'Pick the iris size, then click the color frames to use. Two frames on reads as F1+2. NC means no color.' },
     { id: 'cue-wlq', target: 'cue-wlq', title: 'w/LQ',
       body: 'Turn this on and the When line reads "w/ LQ" with this cue\'s number. It stays linked if you renumber the cue.' },
     { id: 'cue-cell', target: 'cue-cell', title: 'Do more with a cue',

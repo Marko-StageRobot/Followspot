@@ -1,21 +1,20 @@
 import React, { useState, useEffect } from 'react';
 const { ipcRenderer } = window.require('electron');
 
-// iPad Sync: lets SpotPlot for iPad find this Mac on the local network, pair with a code,
-// and download shows. Lists paired iPads and which are online (they report in every few seconds).
+// iPad Sync for this show: its own switch and 6-digit code. An iPad that enters this show's code gets
+// this show only. Lists the iPads paired with this show and which are online (they report every few seconds).
 export default function IpadSyncPanel({ show }) {
-  const [state, setState] = useState(() => ipcRenderer.sendSync('ipad-sync-state'));
+  const [state, setState] = useState(() => ipcRenderer.sendSync('ipad-sync-state', show.id));
   const [busy, setBusy] = useState(false);
-  const [showTitles] = useState(() => Object.fromEntries((ipcRenderer.sendSync('db-get-shows') || []).map(s => [s.id, s.title])));
 
   useEffect(() => {
-    const timer = setInterval(() => setState(ipcRenderer.sendSync('ipad-sync-state')), 2000);
+    const timer = setInterval(() => setState(ipcRenderer.sendSync('ipad-sync-state', show.id)), 2000);
     return () => clearInterval(timer);
-  }, []);
+  }, [show.id]);
 
   const toggle = async () => {
     setBusy(true);
-    setState(await ipcRenderer.invoke('ipad-sync-set-enabled', !state.enabled));
+    setState(await ipcRenderer.invoke('ipad-sync-set-enabled', { showId: show.id, enabled: !state.enabled }));
     setBusy(false);
   };
 
@@ -26,10 +25,9 @@ export default function IpadSyncPanel({ show }) {
   const smallButton = { height: '24px', padding: '0 10px', background: 'rgba(255,255,255,0.08)', border: 'none', borderRadius: '6px', color: '#FFFFFF', fontSize: '12px', fontWeight: '500', cursor: 'pointer' };
 
   const roleText = (d) => {
-    if (!d.role) return 'Choosing a show';
-    const where = d.showId === show.id ? '' : ` · ${showTitles[d.showId] || 'another show'}`;
-    if (d.role === 'caller') return `Caller${d.spots?.length ? ' (Spots ' + d.spots.join(', ') + ')' : ''}${where}`;
-    return `Spot ${d.spots?.[0] ?? '?'}${where}`;
+    if (!d.role) return 'Choosing a role';
+    if (d.role === 'caller') return `Caller${d.spots?.length ? ' (Spots ' + d.spots.join(', ') + ')' : ''}`;
+    return `Spot ${d.spots?.[0] ?? '?'}`;
   };
   const lastSeenText = (d) => {
     if (!d.lastSeen) return 'Not connected';
@@ -40,17 +38,17 @@ export default function IpadSyncPanel({ show }) {
   return (
     <div>
       <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.55)', marginBottom: '16px', lineHeight: '18px' }}>
-        Send shows to your spot operators' iPads over the local network. No internet needed: the Mac and iPads just need to be on the same network.
+        Send this show to your spot operators' iPads over the local network. No internet needed: the Mac and iPads just need to be on the same network. Each show has its own code, so iPads only ever see the shows you give them the code for.
       </div>
 
       <div style={group}>
         <div style={row(0)}>
           <div style={{ flex: 1 }} onClick={!busy ? toggle : undefined}>
-            <div style={{ fontSize: '13px', color: '#FFFFFF', cursor: 'pointer' }}>Let iPads connect to this Mac</div>
+            <div style={{ fontSize: '13px', color: '#FFFFFF', cursor: 'pointer' }}>Let iPads connect to this show</div>
             <div style={hint}>
               {state.enabled
                 ? (state.running ? `iPads see this Mac as "SpotPlot on ${state.name}".` : 'Starting…')
-                : 'Turn on to pair iPads and send them shows.'}
+                : 'Turn on to pair iPads and send them this show. Off hides this show from iPads, even ones paired before.'}
             </div>
           </div>
           <div onClick={!busy ? toggle : undefined} role="switch" aria-checked={state.enabled}
@@ -66,7 +64,7 @@ export default function IpadSyncPanel({ show }) {
           <div style={group}>
             <div style={{ ...row(0), alignItems: 'flex-start', padding: '16px 14px' }}>
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: '13px', color: '#FFFFFF', marginBottom: '4px' }}>In SpotPlot for iPad, choose this Mac and enter:</div>
+                <div style={{ fontSize: '13px', color: '#FFFFFF', marginBottom: '4px' }}>In SpotPlot for iPad, tap Add Show, choose this Mac and enter this show's code:</div>
                 <div style={{ fontSize: '34px', fontWeight: '700', letterSpacing: '0.18em', color: '#FFFFFF', fontVariantNumeric: 'tabular-nums', margin: '4px 0 8px' }}>
                   {state.code.slice(0, 3)} {state.code.slice(3)}
                 </div>
@@ -77,16 +75,16 @@ export default function IpadSyncPanel({ show }) {
                   </span>
                 </div>
               </div>
-              <button onClick={() => setState(ipcRenderer.sendSync('ipad-sync-new-code'))} style={smallButton}>New code</button>
+              <button onClick={() => setState(ipcRenderer.sendSync('ipad-sync-new-code', show.id))} title="A new code for new iPads. iPads already paired stay paired." style={smallButton}>New code</button>
             </div>
           </div>
         </>
       )}
 
-      <div style={sectionLabel}>iPads</div>
+      <div style={sectionLabel}>iPads with this show</div>
       <div style={group}>
         {state.devices.length === 0 ? (
-          <div style={{ ...row(0), ...hint, fontSize: '13px' }}>No iPads paired yet.</div>
+          <div style={{ ...row(0), ...hint, fontSize: '13px' }}>No iPads paired with this show yet.</div>
         ) : state.devices.map((d, i) => (
           <div key={d.id} style={row(i)}>
             <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: d.online ? '#30D158' : 'rgba(255,255,255,0.25)', flexShrink: 0 }} />
@@ -94,7 +92,7 @@ export default function IpadSyncPanel({ show }) {
               <div style={{ fontSize: '13px', color: '#FFFFFF' }}>{d.name}</div>
               <div style={hint}>{d.online ? roleText(d) : lastSeenText(d)}</div>
             </div>
-            <button onClick={() => { if (window.confirm(`Forget "${d.name}"? It will need the pairing code to connect again.`)) setState(ipcRenderer.sendSync('ipad-sync-forget', d.id)); }}
+            <button onClick={() => { if (window.confirm(`Forget "${d.name}"? It will need the pairing code to connect again.`)) setState(ipcRenderer.sendSync('ipad-sync-forget', { showId: show.id, id: d.id })); }}
               style={{ ...smallButton, color: '#FF453A', background: 'rgba(255,69,58,0.14)' }}>Forget</button>
           </div>
         ))}

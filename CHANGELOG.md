@@ -16,11 +16,20 @@ Cue list
 Printing
 - New: **Action key**, one page showing every action symbol and its name, including your show's custom actions. "Only this show's actions" leaves out the ones no cue uses
 - New: **Scene list**, every scene in order with its song, number of cues, LQ and T· range and script pages, with act breaks marked
+- Two or more color frames now print as **F1+2** (not F1+F2) on spot sheets and the caller sheet, and the same on the iPad
 - New **Cover page** switch for the caller sheet and spot sheets: a bordered first page with the label, the show name and a large logo, the theatre and producer, each spot's number, operator, position and fixture with its color load (just that spot's on a spot sheet; on the caller sheet every spot's frames line up in the same columns), a key to the action symbols the show uses, and the lighting team along the bottom
 
 Spots & shows
 - Spots can have fewer than six color frames. Hover a frame in Spot Settings or New Show and click the small red × to remove it; "+ Add frame" brings it back. Frames keep their numbers (remove Frame 5 and the spot has F1–F4 and F6), and the cue list, prints and color load only show the frames a spot has. If cues use the frame you're removing, you can switch them to another frame or take it out of them
 - Deleting a spot no longer renumbers the others: delete Spot 2 and the show keeps Spots 1 and 3. The delete box offers "Renumber spots" if you'd rather close the gap, and + Add Spot fills the lowest free number
+
+iPad
+- iPad Sync is now per show: each show has its own "Let iPads connect to this show" switch and its own code, in that show's Show Settings → iPad Sync. An iPad that enters a show's code gets that show only, never the other shows on the Mac. Turning a show's switch off hides it from iPads. iPads paired before this change need to enter the show's code once
+- If SpotPlot crashed while iPad Sync was on, iPads could see the Mac twice; that's cleared the next time iPad Sync starts
+- SpotPlot for iPad: Hide Off and Hide Tracked switches (tracked cues hidden by default), a T· Numbers switch, a color load button like the Mac's, intensity stacked over iris, bigger action symbols, and color frames that never wrap ("F1+2" on one line)
+- SpotPlot for iPad: the Caller view now looks like the printed caller sheet, with each spot's color load lined up over its column. A strong line separates cues and a short faint one separates spots, so each cue reads as one row, and every spot's When box in a cue starts at the same height
+- SpotPlot for iPad: highlighted cues stand out more (a tinted row with a solid bar on its left edge), and rows alternate shades so they're easier to tell apart
+- SpotPlot for iPad: tap a cue to flag it **Missed**, **Clarify** or **Idea**. The Flags button lists them all in cue order, filters by kind, shares them as text, and clears them after the show
 
 Other
 - Exported .spotplot files now carry the printed spot sheets and caller sheet, so SpotPlot for iPad has the paperwork for a show opened from a file. Files are a little bigger; other Macs open them as before

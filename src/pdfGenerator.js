@@ -71,6 +71,13 @@ function getActionIconHTML(action, size, customActions) {
 
 // Cue ids where a spot's color (frames or NC) differs from the last color it had.
 // Off cues and cues with no color set are skipped; the spot's first color is highlighted too.
+// "F1,F2" → "F1+2": frames in number order, the F written once
+function framesText(activeFrames) {
+  const frames = (activeFrames || '').split(',').map(f => f.trim()).filter(Boolean)
+    .sort((a, b) => (parseInt(a.slice(1)) || 0) - (parseInt(b.slice(1)) || 0));
+  return frames.map((f, i) => i > 0 && /^F\d+$/.test(f) ? f.slice(1) : f).join('+');
+}
+
 function colorChangeCues(orderedCues, spotCuesForSpot) {
   const changed = new Set();
   let last = null;
@@ -176,7 +183,7 @@ const sceneOrderMap = {};
     }
 
     const char = charMap[sc.character_id];
-    const activeFrames = sc.active_frames ? sc.active_frames.split(',').filter(Boolean).join(' + ') : '';
+    const activeFrames = framesText(sc.active_frames);
     const isOff = sc.action === 'Off';
 
     const isIgnored = sc.ignored === 1;
@@ -666,7 +673,7 @@ function buildCallerSheetHTML({ cueFields, show, spots, colorSlotsBySpot, cues, 
       const sc = spotCues.find(sc => sc.cue_id === cue.id);
       const isOff = !sc || sc.action === 'Off';
       const char = sc ? charMap[sc.character_id] : null;
-      const activeFrames = sc && sc.active_frames ? sc.active_frames.split(',').filter(Boolean).join('+') : '';
+      const activeFrames = sc ? framesText(sc.active_frames) : '';
 
       if (isOff) {
         spotCellsHTML += `

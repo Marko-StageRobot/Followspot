@@ -44,8 +44,8 @@ Working plan for the operator tablet app. Started 2026-10-12. Decisions marked *
 
 1. The desktop advertises itself on the local network (Bonjour, the same discovery AirPrint uses).
 2. The iPad shows "SpotPlot on Maya's MacBook" and the user taps it. Fallbacks for networks that block discovery: scan a QR code shown on the desktop, or type its address.
-3. **Pairing:** the first time, the desktop shows a 6-digit code to enter on the iPad. Paired iPads reconnect automatically.
-4. The iPad picks a **show** and a **role**.
+3. **Pairing (per show, decided 2026-10-17):** each show has its own "Let iPads connect" switch and 6-digit code in its Show Settings → iPad Sync. The iPad taps **Add Show**, picks the Mac and enters that show's code; it gets that show and nothing else on the Mac. The code stays the same until New Code. A show switched off is hidden from iPads, even ones paired before. Paired iPads reconnect automatically.
+4. The iPad picks a **role** (Spot 1, 2… or Caller).
 
 ## On the iPad
 

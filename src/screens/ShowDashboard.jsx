@@ -42,8 +42,8 @@ export default function ShowDashboard({ show: initialShow, navigate }) {
   const [ipadsOnline, setIpadsOnline] = useState(0);
   useEffect(() => {
     const check = () => {
-      const st = ipcRenderer.sendSync('ipad-sync-state');
-      setIpadsOnline(st.devices.filter(d => d.online && d.showId === show.id).length);
+      const st = ipcRenderer.sendSync('ipad-sync-state', show.id);
+      setIpadsOnline(st.devices.filter(d => d.online).length);
     };
     check();
     const timer = setInterval(check, 3000);

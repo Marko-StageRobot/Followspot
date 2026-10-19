@@ -37,17 +37,17 @@ Current desktop version: **0.3.1** (released 2026-10-14). Changes since then: `C
 
   Beta testers on very old versions may need one manual download. Making it private doesn't erase what was public before; no secrets were ever in it
 
-## iPad app (`spotplot-ipad`, not created yet)
+## iPad app (`spotplot-ipad`)
 
 Plan: `docs/ipad-app-plan.md`. Contract with the desktop: `docs/sync-protocol.md`.
 
-- [ ] Phase 1 finish: check landscape (When and Notes get separate columns), run on a real iPad (needs the Apple Developer team set in Xcode → Signing), and check text size in a dark booth. Built and tested in the simulator 2026-10-17: find the Mac, pair, download, Spot and Caller cue lists, Paperwork, update banner with See Changes, opening `.spotplot` files
+- [ ] Phase 1 finish: check landscape (When and Notes get separate columns) and text size in a dark booth on the real iPad
 - [ ] Keep the iPad's copies in step: `Resources/gels.json` (from `src/gels.json`) and `Resources/action-icons.json` (from the ActionIcon SVGs in `src/screens/CueListScreen.jsx`) whenever those change
 - [ ] Phase 2: suggestions (When/Notes editing), offline queue, desktop review list, approval switch
+- [ ] Phase 2: send cue flags (Missed / Clarify / Idea) to the Mac so the LD sees them in the cue list; today they stay on the iPad and can be shared as text
 - [ ] Phase 3: live sync while connected
 - [ ] Phase 4: follow the Eos console (Now / Next bar, live highlight), then grandMA
 - [ ] Phase 5: polish, TestFlight beta, App Store
-- [ ] Desktop: if SpotPlot crashes with iPad Sync on, the Bonjour announcement can linger until restart; make it stop with the app
 
 ## Website (`spotplot-website`, spotplotapp.com)
 - [ ] Buy buttons: switch the "Coming soon" buttons to Stripe checkout links at launch (see the site's README)

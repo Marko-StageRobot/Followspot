@@ -133,6 +133,14 @@ Each item shows a small remove button on hover only: a 16px circle at its top-ri
 ### Gel chips
 A compact way to show a spot's frames in one row: the chips share the row's width (never wrapping), each taking the room its gel number needs, each with a 5px color strip on top (the gel's color; several gels sit side by side; empty is a dashed outline), the frame label below (F1…, Bold 9, Label 3) and the gel number (Medium 11), cut short with "…" if the row is narrow. Fill 3 background, radius 5, 3px apart. The permanent frame gets a gold outline and a gold "PERM" label. Hover shows the full gel. Used in the cue list header's color load.
 
+### Cue flags (iPad)
+Quick marks an operator puts on a cue: **Missed** (red, `exclamationmark.triangle.fill`), **Clarify** (orange, `questionmark.circle.fill`), **Idea** (yellow, `lightbulb.fill`). Tapping a cue opens a popover with three big buttons (96×78, radius 14, the color at 16% behind the symbol and label). A flagged cue shows small symbols under its T· number.
+
+### Highlighted rows and row shading (iPad)
+A highlighted cue gets its color at 24% across the row plus a solid 5pt bar on its left edge. A highlighted When/Notes line uses 42%. Cue rows alternate between no fill and white at 3.5% so rows are easy to tell apart. In the caller view (spots side by side), cues are split by a full-width line (white 16%) and spots by a short, faint line (white 9%, stopping 10pt short of the top and bottom), so a cue reads as one row and it never looks like a grid. Each spot's When box in a row starts at the same height.
+
+Several color frames are written **F1+2** (the F once, frames in number order), on prints and on the iPad.
+
 ### Right-click (context) menus
 Popover fill `#1A1A1A`, 1px `rgba(255,255,255,0.12)` border, radius 10, 5px padding, popover shadow, about 190px wide. Optional first line: a small Label 2 heading saying what was clicked (e.g. "Spot 1 · LQ 20"). Items are 22px high, Regular 13, radius 6; hover is an accent (`#0A84FF`) fill with white text, like macOS. Destructive items use the red label. An item that can't apply is shown at 30% and does nothing. Closes on click outside, Esc, scroll or leaving the window.
 
