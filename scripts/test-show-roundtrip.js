@@ -18,6 +18,10 @@ const dbPath = path.join(work, 'followspot.db');
 fs.copyFileSync(source, dbPath);
 const imagesDir = path.join(work, 'images');
 const db = new Database(dbPath);
+// The app renames these when it opens a database (main.js initSchema) and when it imports an older file,
+// so bring the copy up to date first, the same way
+db.exec("UPDATE spot_cues SET action = 'Increase' WHERE action = 'Fade Up'");
+db.exec("UPDATE spot_cues SET action = 'Decrease' WHERE action = 'Fade Down'");
 
 // Links between rows are compared by position instead of id
 const SKIP = new Set(['id', 'show_id', 'spot_id', 'cue_id', 'scene_id', 'character_id', 'created_at', 'updated_at']);

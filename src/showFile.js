@@ -6,6 +6,8 @@ const fs = require('fs');
 const path = require('path');
 
 const FORMAT_VERSION = '2.0';
+// Actions renamed since older files were made (older SpotPlot called them Fade Up / Fade Down)
+const RENAMED_ACTIONS = { 'Fade Up': 'Increase', 'Fade Down': 'Decrease' };
 
 function parseJSON(text) {
   try { return JSON.parse(text || 'null'); } catch(e) { return null; }
@@ -97,7 +99,7 @@ function importShow(db, data, { imagesDir }) {
     }
     for (const sc of data.spotCues || []) {
       if (!cueMap[sc.cue_id] || !spotMap[sc.spot_id]) continue;
-      insert('spot_cues', { ...sc, cue_id: cueMap[sc.cue_id], spot_id: spotMap[sc.spot_id], character_id: charMap[sc.character_id] || null });
+      insert('spot_cues', { ...sc, action: RENAMED_ACTIONS[sc.action] || sc.action, cue_id: cueMap[sc.cue_id], spot_id: spotMap[sc.spot_id], character_id: charMap[sc.character_id] || null });
     }
   })();
 

@@ -3,8 +3,8 @@ const { ipcRenderer } = window.require('electron');
 
 const DEFAULT_ACTIONS = [
   { name: 'Pick Up', color: '#30D158' },
-  { name: 'Fade Up', color: '#30D158' },
-  { name: 'Fade Down', color: '#FF453A' },
+  { name: 'Increase', color: '#30D158' },
+  { name: 'Decrease', color: '#FF453A' },
   { name: 'Fade Out', color: '#FF453A' },
   { name: 'Fade In Place', color: '#FF453A' },
   { name: 'Bump Up', color: '#30D158' },
@@ -30,8 +30,8 @@ function ActionIcon({ action, size = 28 }) {
   const s = size;
   switch (action) {
     case 'Pick Up': return <svg width={s} height={s} viewBox="0 0 32 32"><polygon points="16,4 24,20 8,20" fill="#30D158"/><polygon points="16,14 22,26 10,26" fill="#6BD58A" opacity="0.5"/></svg>;
-    case 'Fade Up': return <svg width={s} height={s} viewBox="0 0 32 32"><polygon points="16,5 23,18 9,18" fill="#30D158"/></svg>;
-    case 'Fade Down': return <svg width={s} height={s} viewBox="0 0 32 32"><polygon points="16,27 23,14 9,14" fill="#FF453A"/></svg>;
+    case 'Increase': return <svg width={s} height={s} viewBox="0 0 32 32"><polygon points="16,5 23,18 9,18" fill="#30D158"/></svg>;
+    case 'Decrease': return <svg width={s} height={s} viewBox="0 0 32 32"><polygon points="16,27 23,14 9,14" fill="#FF453A"/></svg>;
     case 'Fade Out': return <svg width={s} height={s} viewBox="0 0 32 32"><polygon points="16,28 24,12 8,12" fill="#FF453A"/><polygon points="16,18 22,6 10,6" fill="#FF6961" opacity="0.5"/></svg>;
     case 'Fade In Place': return <svg width={s} height={s} viewBox="0 0 32 32"><circle cx="16" cy="16" r="10" fill="none" stroke="#FF453A" strokeWidth="2"/><polygon points="16,27 23,14 9,14" fill="#FF453A"/></svg>;
     case 'Bump Up': return <svg width={s} height={s} viewBox="0 0 32 32"><rect x="8" y="10" width="16" height="3" rx="1.5" fill="#30D158"/><rect x="10" y="15" width="12" height="3" rx="1.5" fill="#30D158" opacity="0.6"/><rect x="12" y="20" width="8" height="3" rx="1.5" fill="#30D158" opacity="0.3"/></svg>;

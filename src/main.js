@@ -187,6 +187,14 @@ function initSchema() {
     }
     db.pragma('user_version = 2');
   }
+  // One-time: the actions Fade Up and Fade Down were renamed Increase and Decrease
+  if (db.pragma('user_version', { simple: true }) < 3) {
+    db.transaction(() => {
+      db.exec("UPDATE spot_cues SET action = 'Increase' WHERE action = 'Fade Up'");
+      db.exec("UPDATE spot_cues SET action = 'Decrease' WHERE action = 'Fade Down'");
+      db.pragma('user_version = 3');
+    })();
+  }
 }
 
 // The gel catalog comes from src/gels.json: [maker, number, name, color] for every gel the makers

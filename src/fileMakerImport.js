@@ -15,7 +15,7 @@ const { execFileSync } = require('child_process');
 const { DEFAULT_IRIS_SIZES } = require('./irisSizes');
 
 // SpotPlot's built-in actions (the cue list's ACTIONS in src/screens/CueListScreen.jsx)
-const SPOTPLOT_ACTIONS = ['Pick Up', 'Fade Up', 'Fade Down', 'Fade Out', 'Fade In Place', 'Bump Up', 'Bump Out', 'Swap To', 'Slide To',
+const SPOTPLOT_ACTIONS = ['Pick Up', 'Increase', 'Decrease', 'Fade Out', 'Fade In Place', 'Bump Up', 'Bump Out', 'Swap To', 'Slide To',
   'Stay With', 'Iris In', 'Iris Out', 'Iris/Fade Up', 'Iris/Fade Down', 'Iris/Fade Out', 'Up & Out', 'Dump & Restore', 'Bump Color',
   'Roll Color', 'Ballyhoo', 'Off', 'Tracked'];
 // Actions after which the spot is out
@@ -26,12 +26,13 @@ const norm = (s) => String(s || '').toLowerCase().replace(/&/g, 'and').replace(/
 // Names in the file that are exactly a SpotPlot action, just spelled its own way
 const ACTION_ALIASES = {
   fadeinplce: 'Fade In Place', dmpandrst: 'Dump & Restore', dmprst: 'Dump & Restore', dumpandrestore: 'Dump & Restore',
-  irisfadedn: 'Iris/Fade Down', upandout: 'Up & Out', bumpcolour: 'Bump Color', rollcolour: 'Roll Color',
+  irisfadedn: 'Iris/Fade Down', upandout: 'Up & Out',
+  fadeup: 'Increase', fadedown: 'Decrease', fadedn: 'Decrease',   // older names for Increase / Decrease bumpcolour: 'Bump Color', rollcolour: 'Roll Color',
 };
 for (const a of SPOTPLOT_ACTIONS) ACTION_ALIASES[norm(a)] = a;
 // Close guesses to start the menu on, for names that aren't an exact match (the person decides)
-const ACTION_SUGGESTIONS = { intensityup: 'Fade Up', intensitydown: 'Fade Down', hold: 'Tracked', crosfadeup: 'Fade Up', crossfadeup: 'Fade Up',
-  crosfadedn: 'Fade Down', crossfadedown: 'Fade Down' };
+const ACTION_SUGGESTIONS = { intensityup: 'Increase', intensitydown: 'Decrease', hold: 'Tracked', crosfadeup: 'Increase', crossfadeup: 'Increase',
+  crosfadedn: 'Decrease', crossfadedown: 'Decrease' };
 
 const SIZE_ALIASES = {};
 for (const s of DEFAULT_IRIS_SIZES) { SIZE_ALIASES[norm(s.label)] = s.value; SIZE_ALIASES[norm(s.value)] = s.value; }

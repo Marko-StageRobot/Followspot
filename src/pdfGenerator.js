@@ -32,8 +32,8 @@ function actionIconSVG(action, size = 28) {
   const s = size;
   const icons = {
     'Pick Up': `<svg width="${s}" height="${s}" viewBox="0 0 32 32"><polygon points="16,4 24,20 8,20" fill="#3B6D11"/><polygon points="16,14 22,26 10,26" fill="#639922" opacity="0.5"/></svg>`,
-    'Fade Up': `<svg width="${s}" height="${s}" viewBox="0 0 32 32"><polygon points="16,5 23,18 9,18" fill="#3B6D11"/></svg>`,
-    'Fade Down': `<svg width="${s}" height="${s}" viewBox="0 0 32 32"><polygon points="16,27 23,14 9,14" fill="#A32D2D"/></svg>`,
+    'Increase': `<svg width="${s}" height="${s}" viewBox="0 0 32 32"><polygon points="16,5 23,18 9,18" fill="#3B6D11"/></svg>`,
+    'Decrease': `<svg width="${s}" height="${s}" viewBox="0 0 32 32"><polygon points="16,27 23,14 9,14" fill="#A32D2D"/></svg>`,
     'Fade Out': `<svg width="${s}" height="${s}" viewBox="0 0 32 32"><polygon points="16,28 24,12 8,12" fill="#A32D2D"/><polygon points="16,18 22,6 10,6" fill="#E24B4A" opacity="0.5"/></svg>`,
     'Fade In Place': `<svg width="${s}" height="${s}" viewBox="0 0 32 32"><circle cx="16" cy="16" r="10" fill="none" stroke="#A32D2D" stroke-width="2"/><polygon points="16,27 23,14 9,14" fill="#A32D2D"/></svg>`,
     'Bump Up': `<svg width="${s}" height="${s}" viewBox="0 0 32 32"><rect x="8" y="10" width="16" height="3" rx="1.5" fill="#3B6D11"/><rect x="10" y="15" width="12" height="3" rx="1.5" fill="#3B6D11" opacity="0.6"/><rect x="12" y="20" width="8" height="3" rx="1.5" fill="#3B6D11" opacity="0.3"/></svg>`,
@@ -1503,7 +1503,7 @@ function buildCharactersHTML({ show, characters, label, showCostumeNotes }) {
 // ---------- Shared pieces for the action key, scene list and cover pages ----------
 
 // Built-in actions in the same order as the cue list's action menu
-const BUILTIN_ACTIONS = ['Pick Up', 'Fade Up', 'Fade Down', 'Fade Out', 'Fade In Place', 'Bump Up', 'Bump Out', 'Swap To', 'Slide To', 'Stay With',
+const BUILTIN_ACTIONS = ['Pick Up', 'Increase', 'Decrease', 'Fade Out', 'Fade In Place', 'Bump Up', 'Bump Out', 'Swap To', 'Slide To', 'Stay With',
   'Iris In', 'Iris Out', 'Iris/Fade Up', 'Iris/Fade Down', 'Iris/Fade Out', 'Up & Out', 'Dump & Restore', 'Bump Color', 'Roll Color', 'Ballyhoo', 'Off'];
 
 function imageDataURL(filePath) {
