@@ -6,6 +6,8 @@ Sections: Cue list · Printing · Spots & shows · iPad · Fixes · Other. Websi
 
 ## Unreleased
 
+- The window's grey title bar is gone: the red, yellow and green window buttons now sit in SpotPlot's own top bar, like Apple's apps on current macOS. Drag the window by any empty part of the top bar, or double-click it to zoom
+
 ## SpotPlot for iPad (not released yet)
 
 Saved for the iPad app's first release (kept out of the Mac's What's New).

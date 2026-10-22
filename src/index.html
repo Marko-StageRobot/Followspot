@@ -13,6 +13,12 @@
         overflow: hidden;
       }
       .no-scrollbar::-webkit-scrollbar { display: none; }
+      /* The window has no title bar: the top bar (AppHeader) drags the window, so everything you
+         can click in it opts out, or a click would grab the window instead */
+      .app-header button, .app-header input, .app-header select, .app-header textarea, .app-header a,
+      .app-header [role="button"], .app-header [style*="cursor: pointer"] { -webkit-app-region: no-drag; }
+      /* Screens without a top bar (license, loading) get an invisible strip to drag the window by */
+      .window-drag-strip { position: fixed; top: 0; left: 0; right: 0; height: 28px; -webkit-app-region: drag; z-index: 1; }
       .rich-line:empty::before { content: attr(data-placeholder); color: rgba(255,255,255,0.28); pointer-events: none; }
     </style>
   </head>

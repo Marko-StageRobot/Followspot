@@ -402,6 +402,8 @@ function setupIPC() {
 
   // Anonymous ID for this Mac (the license server allows each license on 2 Macs).
   // Random, created once, kept in SpotPlot's data folder: no names or hardware info.
+  ipcMain.on('window-is-fullscreen', (event) => { event.returnValue = !!(mainWindow && mainWindow.isFullScreen()); });
+
   ipcMain.on('get-device-info', (event) => {
     const fs = require('fs');
     const file = path.join(app.getPath('userData'), 'device.json');
@@ -1106,6 +1108,10 @@ const createWindow = () => {
     height: 900,
     title: 'SpotPlot',
     icon: path.join(__dirname, '../src/icons/mac/icon.icns'),
+    // No grey title bar: the window buttons sit inside SpotPlot's own top bar (AppHeader), like
+    // Apple's apps on current macOS. The top bar's empty space drags the window.
+    titleBarStyle: 'hidden',
+    trafficLightPosition: { x: 20, y: 19 },
     webPreferences: {
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
       nodeIntegration: true,
@@ -1113,6 +1119,11 @@ const createWindow = () => {
       plugins: true, // built-in PDF viewer for the print preview
     },
   });
+
+// Full screen hides the window buttons, so the top bar can use that space
+  const sendFullScreen = () => mainWindow.webContents.send('window-fullscreen', mainWindow.isFullScreen());
+  mainWindow.on('enter-full-screen', sendFullScreen);
+  mainWindow.on('leave-full-screen', sendFullScreen);
 
 mainWindow.webContents.session.webRequest.onHeadersReceived((details, callback) => {
     // Only SpotPlot's own pages; the built-in PDF viewer (print preview) loads internal pages

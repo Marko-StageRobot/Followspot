@@ -4,18 +4,24 @@ const { ipcRenderer } = window.require('electron');
 
 export default function AppHeader({ title, onBack, backLabel, children }) {
   const [logoSrc, setLogoSrc] = useState('');
+  // The window buttons (red/yellow/green) sit at the top bar's left; room for them except in full screen
+  const [fullScreen, setFullScreen] = useState(() => ipcRenderer.sendSync('window-is-fullscreen'));
 
   useEffect(() => {
     const result = ipcRenderer.sendSync('get-app-icon');
     if (result) setLogoSrc(result);
+    const onFullScreen = (_e, on) => setFullScreen(on);
+    ipcRenderer.on('window-fullscreen', onFullScreen);
+    return () => ipcRenderer.removeListener('window-fullscreen', onFullScreen);
   }, []);
 
   return (
-    <div style={{
+    <div className="app-header" style={{
       // macOS unified toolbar: slightly lighter than the window, hairline separator, 52px tall
       height: '52px',
       boxSizing: 'border-box',
-      padding: '0 20px',
+      padding: fullScreen ? '0 20px' : '0 20px 0 88px',
+      WebkitAppRegion: 'drag',   // empty space drags the window; controls opt out (index.html)
       borderBottom: '1px solid rgba(0,0,0,0.45)',
       boxShadow: 'inset 0 -1px 0 rgba(255,255,255,0.04)',
       background: '#282828',

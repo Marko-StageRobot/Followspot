@@ -88,20 +88,21 @@ export default function App() {
     setCurrentShow(data || null);
     setScreen(dest);
   };
+  const dragStrip = <div className="window-drag-strip" />;
   if (licenseStatus === 'checking') {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#1E1E1E', color: 'rgba(255,255,255,0.45)', fontSize: '14px' }}>
-        Loading SpotPlot...
+        {dragStrip}Loading SpotPlot...
       </div>
     );
   }
 
   if (licenseStatus === 'unlicensed') {
-    return <LicenseScreen onActivated={() => setLicenseStatus('valid')} />;
+    return <>{dragStrip}<LicenseScreen onActivated={() => setLicenseStatus('valid')} /></>;
   }
 
   if (licenseStatus === 'device_limit') {
-    return <ExpiredScreen
+    return <>{dragStrip}<ExpiredScreen
       title="License in use on 2 Macs"
       message="This SpotPlot license is already active on 2 other Macs, which is the limit. A Mac that hasn't opened SpotPlot for 30 days frees its spot automatically. Otherwise, contact support to free a slot, or use a different license."
       onRetry={checkLicense}
@@ -109,17 +110,17 @@ export default function App() {
         localStorage.removeItem('spotplot_license');
         setLicenseStatus('unlicensed');
       }}
-    />;
+    /></>;
   }
 
   if (licenseStatus === 'expired') {
-    return <ExpiredScreen 
+    return <>{dragStrip}<ExpiredScreen
       onRetry={checkLicense} 
       onNewLicense={() => {
         localStorage.removeItem('spotplot_license');
         setLicenseStatus('unlicensed');
-      }} 
-    />;
+      }}
+    /></>;
   }
 
   return (

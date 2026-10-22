@@ -144,6 +144,9 @@ A highlighted cue gets its color at 24% across the row plus a solid 5pt bar on i
 
 Several color frames are written **F1+2** (the F once, frames in number order), on prints and on the iPad.
 
+### Window and top bar
+The window has no title bar (`titleBarStyle: 'hidden'` in main.js). The macOS window buttons sit inside the top bar (`AppHeader`, 52px, Toolbar color) at its left, so the bar keeps 88px clear on the left, and 20px in full screen, when the buttons hide. The bar's empty space drags the window, and double-clicking it zooms. Anything clickable in it must opt out of dragging: buttons, fields, menus and links do automatically (index.html), and so does anything styled `cursor: pointer`. Screens without the top bar (license, loading) use the invisible `.window-drag-strip`.
+
 ### Settings-style grouped rows
 For settings and account screens, like macOS System Settings: a group title (Body 13, semibold, Label 1) above a rounded group (Fill 3, radius 10) of rows separated by hairlines (Separator, inset 12px). Each row is at least 36px: label on the left (Body 13, optional Subheadline 11 hint in Label 2 below), value (Label 2) or a control (Regular 24px button, switch) on the right. Rows that are links show `›` (opens something in the app) or `↗` (leaves the app) in Label 3 and turn accent text on hover. A short footer (Subheadline 11, Label 2) can sit under a group. Example: `src/components/SettingsPanel.jsx`.
 
