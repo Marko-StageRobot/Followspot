@@ -1,7 +1,7 @@
 {
   "name": "spotplot",
   "productName": "spotplot",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "description": "My Electron application description",
   "main": ".webpack/main",
   "private": true,

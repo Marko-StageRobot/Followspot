@@ -13,7 +13,7 @@ Current desktop version: **0.3.1** (released 2026-10-14). Changes since then: `C
 
 ## Desktop app (`followspot`)
 
-### Next (0.4.0)
+### Next (0.4.1)
 - [ ] Faster cue list loading: big shows take a couple of seconds to open
 - [ ] Update notices: Settings → Updates now shows checking / downloading / ready and re-checks every 4 hours. Still to do: a small "Downloading SpotPlot X.X.X…" notice outside Settings, and SpotPlot → Check for Updates… saying "You're up to date" instead of nothing visible. Only helps once people have 0.4.0
 - [ ] FileMaker import, next: try more FileMaker show files (older template versions, other designers' shows, 4-spot shows, encrypted ones) and add any action names or field layouts they use; bring across logos and actor photos if the files keep them inside (FMP Tools doesn't read pictures yet); first `npm run make` with the reader inside: check it's signed and runs in the installed app
